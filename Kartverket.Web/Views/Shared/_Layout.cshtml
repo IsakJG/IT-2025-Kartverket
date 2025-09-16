@@ -3,12 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FirstWebApplication</title>
+    <title>@ViewData["Title"] - Kartverket.Web</title>
 
-    <!-- Tailwind (CDN for quick start). For production, use a proper build pipeline. -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Optionally extend Tailwind (example keeps it minimal)
         tailwind.config = {
           theme: {
             extend: {
@@ -18,9 +17,13 @@
         }
     </script>
 
-    <!-- Your app/site styles if needed -->
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FirstWebApplication.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Kartverket.Web.styles.css" asp-append-version="true" />
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
     <!-- Header / Nav -->
@@ -28,7 +31,7 @@
         <nav class="container flex items-center justify-between py-3">
             <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
                asp-area="" asp-controller="Home" asp-action="Index">
-                FirstWebApplication
+                Kartverket.Web
             </a>
 
             <!-- Mobile menu button -->
@@ -55,7 +58,15 @@
                         <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
                            asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </li>
+
+                    <li>
+                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                           asp-area="" asp-controller="Map" asp-action="Index">Kart</a>
+                    </li>
                 </ul>
+
+
+
             </div>
         </nav>
     </header>
@@ -70,7 +81,7 @@
     <!-- Footer -->
     <footer class="border-t bg-white text-sm text-gray-600">
         <div class="container py-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p>&copy; 2025 - FirstWebApplication</p>
+            <p>&copy; 2025 - Kartverket.Web</p>
             <p>
                 <a class="text-indigo-700 hover:underline"
                    asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -80,7 +91,7 @@
 
     <!-- Scripts -->
     <script>
-        // Simple mobile nav toggle (no Bootstrap)
+        // Mobile nav toggle
         const navToggle = document.getElementById('navToggle');
         const primaryNav = document.getElementById('primaryNav');
         if (navToggle && primaryNav) {
@@ -96,60 +107,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-
-
-
-
-
-
-@*﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Kartverket.Web</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Kartverket.Web.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Kartverket.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Kartverket.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
-*@

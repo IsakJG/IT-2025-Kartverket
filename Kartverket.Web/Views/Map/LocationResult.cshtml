@@ -1,0 +1,11 @@
+@model Kartverket.Web.Models.MapViewModel
+@{
+    ViewData["Title"] = "Valgt posisjon";
+}
+
+<h2 class="text-xl font-bold mb-4">Du valgte denne posisjonen:</h2>
+
+<p><strong>Latitude:</strong> @Model.Latitude</p>
+<p><strong>Longitude:</strong> @Model.Longitude</p>
+
+<a asp-action="Index" class="inline-block mt-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Tilbake</a>

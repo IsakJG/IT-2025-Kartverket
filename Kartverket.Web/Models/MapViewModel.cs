@@ -1,0 +1,8 @@
+namespace Kartverket.Web.Models
+{
+    public class MapViewModel
+    {
+        public double Latitude { get; set; }
+        public double Longitude{ get; set; }
+    }
+}
