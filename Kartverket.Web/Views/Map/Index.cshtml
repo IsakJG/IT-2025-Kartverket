@@ -7,9 +7,9 @@
 
 <div id="map" style="height: 400px;" class="mb-4 border rounded shadow"></div>
 
-<form asp-action="ShowLocation" method="post" class="space-y-2">
-    <input type="hidden" name="Latitude" id="Latitude" />
-    <input type="hidden" name="Longitude" id="Longitude" />
+<form asp-controller="Map" asp-action="ShowLocation" method="post" class="space-y-2">
+    <input type="hidden" asp-for="Latitude" id="Latitude" />
+    <input type="hidden" asp-for="Longitude" id="Longitude" />
     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Send posisjon</button>
 </form>
 
