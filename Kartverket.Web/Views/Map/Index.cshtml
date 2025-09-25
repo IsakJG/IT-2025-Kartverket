@@ -4,9 +4,10 @@
 }
 
 <h2 class="text-xl font-bold mb-4">Velg et punkt på kartet</h2>
-
+<!-- Her vises Leaflet kartet etter hvordan css layouten er -->
 <div id="map" style="height: 400px;" class="mb-4 border rounded shadow"></div>
 
+<!-- Bruker MapController klassen, Showlocation metoden, som http post -->
 <form asp-controller="Map" asp-action="ShowLocation" method="post" class="space-y-2">
     <input type="hidden" asp-for="Latitude" id="Latitude" />
     <input type="hidden" asp-for="Longitude" id="Longitude" />
@@ -19,7 +20,7 @@
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
-    }).addTo(map);
+    }).addTo(map); //Brukte ChatGPT for å implementere Leaflet, med start posisjon i Oslo.
 
     var marker;
     map.on('click', function (e) {
