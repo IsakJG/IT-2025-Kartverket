@@ -24,6 +24,14 @@
                 <dt class="text-sm font-medium text-gray-600">Description</dt>
                 <dd class="mt-1 text-base text-gray-900 break-words sm:col-span-3">@Model.ObstacleDescription</dd>
             </div>
+
+            <div class="sm:col-span-3">
+                <dt class="text-sm font-medium text-gray-600">Location</dt>
+                <dd class="mt-1 text-base text-gray-900">
+                    Latitude: @Model.Latitude.ToString("F6")<br />
+                    Longitude: @Model.Longitude.ToString("F6")
+                </dd>
+            </div>
         </dl>
 
         <div class="pt-2">

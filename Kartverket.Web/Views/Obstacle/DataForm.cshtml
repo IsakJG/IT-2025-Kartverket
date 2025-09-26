@@ -3,14 +3,32 @@
     ViewData["Title"] = "Register Obstacle";
 }
 
-<section class="mx-auto max-w-2xl">
+<section class="mx-auto max-w-4xl">
     <div class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-6">
         <header class="mb-6">
             <h1 class="text-2xl font-semibold">Obstacle Registration Form</h1>
-            <p class="text-gray-600 mt-1">Please register an obstacle:</p>
+            <p class="text-gray-600 mt-1">Please register an obstacle and select its location on the map:</p>
         </header>
 
         <form asp-action="DataForm" method="post" class="space-y-5">
+            <!-- Kart seksjon -->
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-800 mb-2">Select Obstacle Location</label>
+                <div id="map" style="height: 300px;" class="mb-4 border rounded shadow"></div>
+                <p class="text-sm text-gray-600 mb-2">Click on the map to select the obstacle location</p>
+                
+                <!-- Skjulte felter for koordinater -->
+                <input type="hidden" asp-for="Latitude" id="Latitude" />
+                <input type="hidden" asp-for="Longitude" id="Longitude" />
+                <span asp-validation-for="Latitude" class="text-sm text-red-600"></span>
+                <span asp-validation-for="Longitude" class="text-sm text-red-600"></span>
+                
+                <!-- Vis valgt posisjon -->
+                <div id="selectedLocation" class="text-sm text-gray-700 mt-2 hidden">
+                    Selected location: <span id="latDisplay"></span>, <span id="lngDisplay"></span>
+                </div>
+            </div>
+
             <div class="grid gap-5 sm:grid-cols-2">
                 <!-- Obstacle Name -->
                 <div class="sm:col-span-2">
@@ -44,17 +62,65 @@
                 </div>
             </div>
 
-            <div class="pt-2">
+            <div class="pt-2 flex gap-3">
                 <button type="submit"
                         class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                     Submit Data
                 </button>
+                <a asp-controller="Home" asp-action="Index"
+                   class="inline-flex items-center rounded-lg px-4 py-2 ring-1 ring-gray-300 hover:bg-gray-50">
+                    Back to Home
+                </a>
             </div>
         </form>
     </div>
 </section>
 
 @section Scripts {
-    <!-- If you use client-side validation, keep the standard validation partial -->
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([59.91, 10.75], 13); // Start in Oslo
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+        
+        // Handle map click to place marker
+        map.on('click', function (e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng).addTo(map);
+
+            // Update hidden form fields
+            document.getElementById('Latitude').value = e.latlng.lat;
+            document.getElementById('Longitude').value = e.latlng.lng;
+
+            // Display selected location
+            document.getElementById('latDisplay').textContent = e.latlng.lat.toFixed(6);
+            document.getElementById('lngDisplay').textContent = e.latlng.lng.toFixed(6);
+            document.getElementById('selectedLocation').classList.remove('hidden');
+        });
+
+        // Optional: Add validation to ensure location is selected before form submission
+        document.querySelector('form').addEventListener('submit', function (e) {
+            var lat = document.getElementById('Latitude').value;
+            var lng = document.getElementById('Longitude').value;
+            
+            if (!lat || !lng) {
+                e.preventDefault();
+                alert('Please select a location on the map before submitting.');
+            }
+        });
+    </script>
+
+    <!-- Client-side validation -->
     <partial name="_ValidationScriptsPartial" />
 }
