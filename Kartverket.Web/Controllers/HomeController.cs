@@ -35,10 +35,9 @@ public class HomeController : Controller
         _logger.LogInformation("GetAThing called with id {Id}", id);
         if (id > 10) 
         {
-            return View(new ThingModel { Name = "Espen" });
+            return View(new ThingModel { Name = "Model" });
         }
-        return View(new ThingModel { Name = "Rania" });
-
+        return View(new ThingModel { Name = "Thing" });
     }
 
     

@@ -35,7 +35,7 @@ namespace Kartverket.Web.UnitTests.Controllers
             var viewResult = result as ViewResult;
             var model = viewResult.Model as Models.ThingModel;
             // Assert
-            Assert.Equal("Espen", model.Name);
+            Assert.Equal("Isak", model.Name);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Kartverket.Web.UnitTests.Controllers
             var viewResult = result as ViewResult;
             var model = viewResult.Model as Models.ThingModel;
             // Assert
-            Assert.Equal("Rania", model.Name);
+            Assert.Equal("Benjamin", model.Name);
         }
 
         private HomeController GetUnitUnderTest()
