@@ -1,4 +1,11 @@
+using System.Globalization;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Setter kultur til en-US for å bruke engelsk tallformat
+var cultureInfo = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.AddServiceDefaults();
 
