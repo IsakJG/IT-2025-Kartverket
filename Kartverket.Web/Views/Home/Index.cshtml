@@ -1,25 +1,30 @@
 @model string
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Kartverket";
 }
 
 <section class="mx-auto max-w-3xl">
     <div class="text-center space-y-4">
-        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Welcome</h1>
-        <p class="text-base sm:text-lg text-gray-700">
-            Learn about
-            <a class="text-indigo-700 hover:underline"
-               href="https://learn.microsoft.com/aspnet/core">
-                building Web apps with ASP.NET Core
-            </a>.
-        </p>
+        <div class="space-y-4">
+            <h1 class="text-4xl sm:text-5xl font-normal tracking-wide text-gray-920">
+                WELCOME TO
+            </h1>
+            <h2 class="text-4xl sm:text-5xl font-normal tracking-wide text-gray-920">
+                KARTVERKET
+            </h2>
+        </div>
+        <div class="flex justify-center pl-4">
+            <img src="~/images/Kartverketlogo.svg"
+                 alt="Kartverket"
+                 class="h-30 w-auto" />
+        </div>
         @if (!string.IsNullOrWhiteSpace(Model))
         {
             <p class="text-gray-800">@Model</p>
         }
         <div class="pt-4">
             <a asp-action="DataForm" asp-controller="Obstacle"
-               class="inline-flex items-center rounded-lg px-4 py-2 ring-1 ring-indigo-600 text-indigo-700 hover:bg-indigo-50">
+               class="block w-full max-w-sm mx-auto px-8 py-4 text-lg font-normal tracking-wide text-gray-900 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors duration-200">
                 Register Obstacle
             </a>
         </div>
