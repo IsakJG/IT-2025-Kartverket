@@ -41,7 +41,11 @@ public class HomeController : Controller
 
     }
 
-    
+    public IActionResult MainPage()
+{
+    return View();
+}
+
 
     public IActionResult Privacy()
     {
