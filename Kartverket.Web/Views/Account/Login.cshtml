@@ -1,0 +1,150 @@
+﻿@{
+    ViewData["Title"] = "Sign In";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        background-color: #e8e8e8;
+        margin: 0;
+        padding: 0;
+    }
+
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 100px);
+        padding: 20px;
+    }
+
+    .login-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 60px 50px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .user-icon {
+        width: 80px;
+        height: 80px;
+        background-color: #f0f0f0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+    }
+
+        .user-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+
+    .login-title {
+        font-size: 36px;
+        font-weight: 300;
+        letter-spacing: 2px;
+        margin-bottom: 50px;
+        color: #000;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+        text-align: left;
+    }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #000;
+            font-weight: 400;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            background-color: #d9d9d9;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+            .form-group input:focus {
+                outline: none;
+                background-color: #cfcfcf;
+            }
+
+    .submit-container {
+        text-align: right;
+        margin-top: 40px;
+    }
+
+    .submit-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 2px solid #000;
+        background-color: white;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+        .submit-btn:hover {
+            background-color: #000;
+        }
+
+            .submit-btn:hover svg {
+                stroke: white;
+            }
+
+        .submit-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: #000;
+            stroke-width: 2;
+            transition: stroke 0.3s ease;
+        }
+</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="user-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </div>
+
+        <h1 class="login-title">SIGN IN</h1>
+
+        <form asp-action="Login" method="post">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required />
+            </div>
+
+            <div class="submit-container">
+                <button type="submit" class="submit-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
