@@ -4,28 +4,28 @@
     var username = (User?.Identity?.IsAuthenticated ?? false) ? User.Identity!.Name : "Username";
 }
 
-<!-- Top bar -->
-<header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
+<!-- Top bar --
+<header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b"
 
-  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between"
     <div class="flex items-center gap-2">
-      <!-- Bytt ut src med faktisk logo i wwwroot/images -->
-      <img src="~/images/kartverket-logo.svg" alt="Kartverket" class="h-6 w-auto">
-    </div>
+      <!-- Bytt ut src med faktisk logo i wwwroot/images --
+      <img src="~/images/kartverket-logo.svg" alt="Kartverket" class="h-6 w-auto"
+    </div
 
-    <div class="flex items-center gap-4 text-sm text-gray-700">
+    <div class="flex items-center gap-4 text-sm text-gray-700"
       <span class="hidden sm:inline">Logged in as: <strong>@username</strong></span>
 
-      <!-- Home-knapp -->
+      <!-- Home-knapp --
       <a asp-controller="Home" asp-action="Index"
          class="inline-flex items-center justify-center h-9 w-9 rounded-full border hover:bg-gray-50 transition"
-         aria-label="Home">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 3.172 2.343 12h2.829V21h5.657v-5h2.343v5h5.657v-9h2.829L12 3.172z"/>
-        </svg>
-      </a>
-    </div>
-  </div>
+         aria-label="Home"
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"
+          <path d="M12 3.172 2.343 12h2.829V21h5.657v-5h2.343v5h5.657v-9h2.829L12 3.172z"/
+        </svg
+      </a
+    </div
+  </div
 </header>
 
 <main class="min-h-[calc(100vh-64px)]">
