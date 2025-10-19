@@ -14,7 +14,7 @@ public class ReportController : Controller
         new { Id = 3, Title = "High voltage line", Description = "Tall structure in the way", HeightFeet = 200, Latitude = 58.1550, Longitude = 8.0150 }
     };
 
-    public IActionResult Detail(int id)
+    public IActionResult Details(int id)
     {
         var report = Reports.FirstOrDefault(r => r.Id == id);
         if (report == null)
