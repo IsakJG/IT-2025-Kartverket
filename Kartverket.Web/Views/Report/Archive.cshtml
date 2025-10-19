@@ -1,5 +1,24 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Report Archive";
 }
+
+<section class="mx-auto max-w-4xl py-8">
+    <h1 class="text-4xl font-semibold text-center mb-8">Report Archive</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var report in new[] {
+                new { Title = "Mountain top", Description = "Terrain that  is up into the flight path" },
+                new { Title = "Wind turbines", Description = "A wind turbine in the way of the path" },
+                new { Title = "High voltage line", Description = "Tall structure in the way" }
+                })
+        {
+            <div class="bg-gray-300 rounded-lg p-4 shadow">
+                <h2 class="text-xl font-bold">@report.Title</h2>
+                <p class="text-gray-800 mb-3">@report.Description</p>
+                <a asp-action="Details" asp-controller="Report" class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-900 font-medium px-4 py-2 rounded">
+                    Open
+                </a>
+            </div>
+        }
+    </div>
+</section>
