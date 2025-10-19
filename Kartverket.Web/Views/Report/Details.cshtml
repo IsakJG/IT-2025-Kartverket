@@ -1,5 +1,32 @@
-﻿@{
+﻿@model dynamic
+@{
     ViewData["Title"] = "Report Details";
 }
-<h1>Report Details</h1>
-<p>Placeholder for detailed report content.</p>
+
+<section class="mx-auto max-w-4xl py-8">
+    <h1 class="text-4xl font-semibold text-center mb-6">@Model.Title</h1>
+
+    <div class="bg-gray-300 rounded-lg p-6 shadow mb-6">
+        <p><strong>Height:</strong> @Model.HeightFeet ft</p>
+        <p><strong>Description:</strong> @Model.Description</p>
+    </div>
+
+    <div id="map" class="w-full h-64 rounded-lg shadow mb-6"></div>
+</section>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    var map = L.map('map').setView([@Model.Latitude, @Model.Longitude], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
+        .bindPopup('@Model.Title')
+        .openPopup();
+</script>
+
