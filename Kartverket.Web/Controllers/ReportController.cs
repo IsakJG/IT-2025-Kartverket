@@ -8,5 +8,12 @@ namespace Kartverket.Web.Controllers
         {
             return View();
         }
+
+        public IActionResult Details()
+        {
+            return View();
+        }
+
     }
 }
+
