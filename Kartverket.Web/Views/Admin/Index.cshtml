@@ -1,0 +1,192 @@
+﻿@{
+    ViewData["Title"] = "AdminPage";
+}
+<h1 class="text-2xl font-semibold mb-4">@ViewData["Title"]</h1>
+
+<!--Tabell (Nåverende data er kun dummydata)-->
+<div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+    <table id="reportsTable" class="min-w-full table-auto divide-y divide-gray-200">
+        <!--Kolonner-->
+        <thead class="bg-gray-50">
+            <tr>
+                <th data-sortable="true" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer">
+                    Report ID <span class="ml-1 text-xs sort-indicator inline-block w-4 text-center" aria-hidden="true"></span>
+                </th>
+                <th data-sortable="true" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer">
+                    Position <span class="ml-1 text-xs sort-indicator inline-block w-4 text-center" aria-hidden="true"></span>
+                </th>
+                <th data-sortable="true" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer">
+                    Height <span class="ml-1 text-xs sort-indicator inline-block w-4 text-center" aria-hidden="true"></span>
+                </th>
+                <th data-sortable="true" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer">
+                    Created by <span class="ml-1 text-xs sort-indicator inline-block w-4 text-center" aria-hidden="true"></span>
+                </th>
+                <th data-sortable="true" class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer">
+                    Date <span class="ml-1 text-xs sort-indicator inline-block w-4 text-center" aria-hidden="true"></span>
+                </th>
+            </tr>
+        </thead>
+        <!--Rader-->
+        <tbody class="bg-white divide-y divide-gray-100">
+            <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                <td class="px-4 py-3 text-sm text-gray-700">1001</td>
+                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">59.9139, 10.7522</td>
+                <td class="px-4 py-3 text-sm text-gray-700">12.3 m</td>
+                <td class="px-4 py-3 text-sm text-gray-700">Ingrid Hansen</td>
+                <td class="px-4 py-3 text-sm text-gray-700">2025-10-20 09:15</td>
+            </tr>
+            <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                <td class="px-4 py-3 text-sm text-gray-700">1002</td>
+                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">60.3913, 5.3221</td>
+                <td class="px-4 py-3 text-sm text-gray-700">5.0 m</td>
+                <td class="px-4 py-3 text-sm text-gray-700">Ola Nordmann</td>
+                <td class="px-4 py-3 text-sm text-gray-700">2025-10-21 14:42</td>
+            </tr>
+            <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                <td class="px-4 py-3 text-sm text-gray-700">1003</td>
+                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">63.4305, 10.3951</td>
+                <td class="px-4 py-3 text-sm text-gray-700">23.7 m</td>
+                <td class="px-4 py-3 text-sm text-gray-700">Maria Berg</td>
+                <td class="px-4 py-3 text-sm text-gray-700">2025-10-22 11:03</td>
+            </tr>
+            <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                <td class="px-4 py-3 text-sm text-gray-700">1004</td>
+                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">58.9690, 5.7331</td>
+                <td class="px-4 py-3 text-sm text-gray-700">0.8 m</td>
+                <td class="px-4 py-3 text-sm text-gray-700">Karl Olsen</td>
+                <td class="px-4 py-3 text-sm text-gray-700">2025-10-23 16:27</td>
+            </tr>
+            <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                <td class="px-4 py-3 text-sm text-gray-700">1005</td>
+                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">61.2461, 10.4209</td>
+                <td class="px-4 py-3 text-sm text-gray-700">7.5 m</td>
+                <td class="px-4 py-3 text-sm text-gray-700">Eva Larsen</td>
+                <td class="px-4 py-3 text-sm text-gray-700">2025-10-24 08:50</td>
+            </tr>
+            <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                <td class="px-4 py-3 text-sm text-gray-700">1006</td>
+                <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">59.9115, 10.7579</td>
+                <td class="px-4 py-3 text-sm text-gray-700">15.2 m</td>
+                <td class="px-4 py-3 text-sm text-gray-700">Per Johansen</td>
+                <td class="px-4 py-3 text-sm text-gray-700">2025-10-25 19:05</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        //Rett fra AI
+        // Small, robust client-side sorter for the table above.
+        (function () {
+            const table = document.getElementById('reportsTable');
+            if (!table) return;
+
+            const getCellValue = (row, idx) => row.cells[idx]?.innerText.trim() ?? '';
+
+            // Detect type and produce comparable value
+            const normalize = (val) => {
+                if (!val) return { t: 's', v: '' };
+
+                // Coordinates: "lat, lon"
+                const coordMatch = val.match(/^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/);
+                if (coordMatch) {
+                    const parts = val.split(',').map(s => parseFloat(s.trim()));
+                    // Compare by latitude then longitude
+                    return { t: 'coord', v: parts };
+                }
+
+                // Date/time detection -- explicit parse YYYY-MM-DD[ T]HH:mm(:ss)?
+                const dateMatch = val.match(/^\s*(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?\s*$/);
+                if (dateMatch) {
+                    const year = parseInt(dateMatch[1], 10);
+                    const month = parseInt(dateMatch[2], 10) - 1;
+                    const day = parseInt(dateMatch[3], 10);
+                    const hour = dateMatch[4] ? parseInt(dateMatch[4], 10) : 0;
+                    const minute = dateMatch[5] ? parseInt(dateMatch[5], 10) : 0;
+                    const second = dateMatch[6] ? parseInt(dateMatch[6], 10) : 0;
+                    const ts = Date.UTC(year, month, day, hour, minute, second);
+                    return { t: 'd', v: ts };
+                }
+
+                // Fallback parse with 'T' replacement (handles some browser quirks)
+                const fallbackIso = Date.parse(val.replace(' ', 'T'));
+                if (!isNaN(fallbackIso)) {
+                    return { t: 'd', v: fallbackIso };
+                }
+
+                // Height / numeric detection: either a plain number or a number followed by 'm'
+                const numericMatch = val.trim().match(/^[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?\d+)?\s*(m)?$/i);
+                if (numericMatch) {
+                    const num = parseFloat(val.replace(',', '.').replace(/[^\d\.\-eE]/g, ''));
+                    if (!isNaN(num)) return { t: 'n', v: num };
+                }
+
+                // Fallback: string
+                return { t: 's', v: val.toLowerCase() };
+            };
+
+            const clearIndicators = () => {
+                table.querySelectorAll('th .sort-indicator').forEach(sp => sp.textContent = '');
+                table.querySelectorAll('th').forEach(th => th.removeAttribute('aria-sort'));
+            };
+
+            table.querySelectorAll('th[data-sortable="true"]').forEach((th, colIndex) => {
+                th.addEventListener('click', () => {
+                    const tbody = table.tBodies[0];
+                    if (!tbody) return;
+
+                    const currentOrder = th.dataset.order === 'asc' ? 'asc' : th.dataset.order === 'desc' ? 'desc' : null;
+                    const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+
+                    // build array of rows
+                    const rows = Array.from(tbody.rows);
+
+                    rows.sort((a, b) => {
+                        const Araw = getCellValue(a, colIndex);
+                        const Braw = getCellValue(b, colIndex);
+                        const An = normalize(Araw);
+                        const Bn = normalize(Braw);
+
+                        const dir = newOrder === 'asc' ? 1 : -1;
+
+                        // Coord: compare lat then lon
+                        if (An.t === 'coord' && Bn.t === 'coord') {
+                            if (An.v[0] !== Bn.v[0]) return (An.v[0] - Bn.v[0]) * dir;
+                            return (An.v[1] - Bn.v[1]) * dir;
+                        }
+
+                        // Number
+                        if (An.t === 'n' && Bn.t === 'n') {
+                            return (An.v - Bn.v) * dir;
+                        }
+
+                        // Date (note: stored as numeric timestamp)
+                        if (An.t === 'd' && Bn.t === 'd') {
+                            return (An.v - Bn.v) * dir;
+                        }
+
+                        // Mixed types: prefer numeric/date/coord before strings
+                        if (An.t !== Bn.t) {
+                            const rank = { 'n': 1, 'd': 1, 'coord': 1, 's': 2 };
+                            return (rank[An.t] - rank[Bn.t]) * dir;
+                        }
+
+                        // String compare (locale aware)
+                        return An.v.localeCompare(Bn.v, undefined, { numeric: true }) * dir;
+                    });
+
+                    // re-append in new order
+                    rows.forEach(r => tbody.appendChild(r));
+
+                    // update indicators
+                    clearIndicators();
+                    th.dataset.order = newOrder;
+                    th.setAttribute('aria-sort', newOrder === 'asc' ? 'ascending' : 'descending');
+                    const indicator = th.querySelector('.sort-indicator');
+                    if (indicator) indicator.textContent = newOrder === 'asc' ? '▲' : '▼';
+                });
+            });
+        })();
+    </script>
+}
