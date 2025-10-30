@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Kartverket.Web.Models;
+using MySqlConnector;
 
 namespace Kartverket.Web.Controllers;
 
@@ -17,23 +18,39 @@ public class HomeController : Controller
         this.config = config; // Initialiserer konfigurasjon
     }
 
-/*
-// Send avhengighet til konstruktøren
-    public HomeController(ILogger<HomeController> logger, IConfiguration config)
-    {
-        _logger = logger;
-        _connectionString = config.GetConnectionString("DefaultConnection")!;
-    }
-*/
+    /*
+    // Send avhengighet til konstruktøren
+        public HomeController(ILogger<HomeController> logger, IConfiguration config)
+        {
+            _logger = logger;
+            _connectionString = config.GetConnectionString("DefaultConnection")!;
+        }
+    */
     public IActionResult Index() // Hovedsiden
     {
         return View(); // Returnerer Index viewet
     }
-
+/*
+//databasen koblingstest 
+public async Task<IActionResult> Index()
+    {
+        try
+        {
+            await using var conn = new MySqlConnection(_connectionString);
+            await conn.OpenAsync();
+            return Content("✅ Connection to MariaDB successful!");
+        }
+        catch (Exception ex)
+        {
+            return Content($"❌ Connection failed: {ex.Message}");
+        }
+        
+    }
+    */
     public IActionResult GetAThing(int id) // Eksempelmethode som tar en id som parameter
     {
         _logger.LogInformation("GetAThing called with id {Id}", id); // Logger informasjon om kall
-        if (id > 10) 
+        if (id > 10)
         {
             return View(new ThingModel { Name = "Espen" }); // Returnerer ThingModel med navn "Espen" hvis id er større enn 10
         }
