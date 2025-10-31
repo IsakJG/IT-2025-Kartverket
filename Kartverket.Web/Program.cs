@@ -1,8 +1,15 @@
 using System.Globalization;
+using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Setter kultur til en-US for å bruke engelsk tallformat
+// Dependency Injection (Register services)
+// Get connection string directly from configuration in appsetting.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Register your service that uses the connection
+builder.Services.AddSingleton(new MySqlConnection(connectionString));
+
+// Setter kultur til en-US for ï¿½ bruke engelsk tallformat
 var cultureInfo = new CultureInfo("en-US");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
@@ -13,15 +20,6 @@ builder.AddServiceDefaults();
 builder.Services.AddControllersWithViews();
 builder.AddMySqlDataSource(connectionName: "mysqldb");
 var app = builder.Build();
-
-/*
-// Dependency Injection (Register services)
-// Get connection string directly from configuration in appsetting.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-// Register your service that uses the connection
-builder.Services.AddSingleton(new MySqlConnection(connectionString));
-*/
-
 
 app.MapDefaultEndpoints();
 
