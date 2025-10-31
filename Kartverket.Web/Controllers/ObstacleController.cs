@@ -8,9 +8,9 @@ public class ObstacleController : Controller
 {
     // blir kalt etter at vi trykker på "Register Obstacle" lenken i Index viewet
     [HttpGet]
-    public ActionResult DataForm() // GET
+    public ActionResult DataForm() 
     {
-        return View(); // Returnerer DataForm viewet
+        return View();
     }
 
 
@@ -18,12 +18,12 @@ public class ObstacleController : Controller
     [HttpPost]
     public ActionResult DataForm(ObstacleData obstacledata) // POST
     {
-        bool isDraft = false; // Variabel for å sjekke om data er utkast
-        if (obstacledata.ObstacleDescription == null) // Sjekker om beskrivelsen er tom
+        bool isDraft = false; 
+        if (obstacledata.ObstacleDescription == null) 
         { 
-            isDraft = true; // Setter isDraft til true hvis beskrivelsen er tom
+            isDraft = true; 
         }
 
-        return View("Overview", obstacledata); // Returnerer Overview viewet med obstacledata
+        return View("Overview", obstacledata); 
     }
 }

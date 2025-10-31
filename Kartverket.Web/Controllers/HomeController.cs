@@ -7,79 +7,51 @@ namespace Kartverket.Web.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger; // Logger for logging information
-    private readonly IConfiguration config; // Configuration for accessing app settings
+    private readonly ILogger<HomeController> _logger; 
+    private readonly IConfiguration config; 
    
     //private readonly string _connectionString;
     
-        public HomeController(ILogger<HomeController> logger, IConfiguration config) // Konstruktør for HomeController
+        public HomeController(ILogger<HomeController> logger, IConfiguration config) 
         {
-            _logger = logger; // Initialiserer logger
-            this.config = config; // Initialiserer konfigurasjon
+            _logger = logger; 
+            this.config = config; 
         }
         
 
-        /*
-    // Send avhengighet til konstruktøren
-    public HomeController(IConfiguration config)
+           
+    public IActionResult Index() 
     {
-        _connectionString = config.GetConnectionString("DefaultConnection")!;
-
+        return View(); 
     }
-    */
 
     
-    public IActionResult Index() // Hovedsiden
+    public IActionResult GetAThing(int id) 
     {
-        return View(); // Returnerer Index viewet
-    }
-
-    //databasen koblingstest 
-    /*
-    public async Task<IActionResult> Index()
-    {
-        try
-        {
-            await using var conn = new MySqlConnection(_connectionString);
-            await conn.OpenAsync();
-            return Content("✅ Connection to MariaDB successful!");
-
-        }
-        catch (Exception ex)
-        {
-            return Content($"❌ Connection failed: {ex.Message}");
-
-        }
-
-
-    }
-*/
-    public IActionResult GetAThing(int id) // Eksempelmethode som tar en id som parameter
-    {
-        _logger.LogInformation("GetAThing called with id {Id}", id); // Logger informasjon om kall
+        _logger.LogInformation("GetAThing called with id {Id}", id); 
         if (id > 10)
         {
-            return View(new ThingModel { Name = "Espen" }); // Returnerer ThingModel med navn "Espen" hvis id er større enn 10
+            return View(new ThingModel { Name = "Espen" }); 
         }
-        return View(new ThingModel { Name = "Rania" }); // Returnerer ThingModel med navn "Rania" ellers
+        return View(new ThingModel { Name = "Rania" }); 
 
     }
 
-    public IActionResult MainPage() // En annen side
+    public IActionResult MainPage() 
     {
-        return View(); // Returnerer MainPage viewet
+        return View(); 
     }
 
 
-    public IActionResult Privacy() // Personvern side
+    public IActionResult Privacy() 
     {
-        return View(); // Returnerer Privacy viewet
+        return View(); 
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] // Deaktiverer caching for feilsiden
-    public IActionResult Error() // Feilsiden
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)] 
+    public IActionResult Error() 
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); // Returnerer Error viewet med RequestId
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); 
     }
 }
 

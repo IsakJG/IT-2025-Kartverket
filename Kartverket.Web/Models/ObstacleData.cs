@@ -13,7 +13,7 @@ public class ObstacleData
     [MaxLength(1000)]
     public string ObstacleDescription { get; set; }
     
-    //La til lat og long for kartintegrasjon
+   
     public double Latitude { get; set; }
     public double Longitude { get; set; }
 
