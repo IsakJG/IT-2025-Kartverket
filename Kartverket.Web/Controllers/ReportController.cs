@@ -16,11 +16,12 @@ public class ReportController : Controller
 
     public IActionResult Details(int id)
     {
-        var report = Reports.FirstOrDefault(r => r.Id == id); 
-        if (report == null) 
+        var report = Reports.FirstOrDefault(r => r.Id == id);
+        if (report == null)
         {
-            return NotFound(); 
+            return NotFound();
         }
 
         return View(report);
+    }
 }
