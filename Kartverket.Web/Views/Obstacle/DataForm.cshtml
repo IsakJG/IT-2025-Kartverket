@@ -80,41 +80,136 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
-        // Initialize the map
-        var map = L.map('map').setView([59.91, 10.75], 13); // Start in Oslo
+        // Initialiserer kartet uten å sette en standard posisjon
+        // Kartet vil vises som tomt til brukerens posisjon er hentet
+        var map = L.map('map');
+        var marker; // Variabel for å holde på markøren
+        var userLocationCircle; // Variabel for nøyaktighetssirkelen
 
+        // Legger til OpenStreetMap som bakgrunnskart
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        var marker;
-        
-        // Handle map click to place marker
-        map.on('click', function (e) {
+        // Funksjon som kjøres når brukerens posisjon er funnet
+        function onLocationFound(e) {
+            // e.latlng inneholder latitude og longitude
+            // e.accuracy inneholder nøyaktigheten i meter
+            var radius = e.accuracy / 2; // Radius for nøyaktighetssirkel
+
+            // Setter kartvisningen til brukerens posisjon med zoomnivå 13
+            // Zoomnivå 13 er et godt nivå for å se detaljer i nærområdet
+            map.setView(e.latlng, 13);
+
+            // Fjerner eksisterende markør hvis den finnes
             if (marker) {
                 map.removeLayer(marker);
             }
-            marker = L.marker(e.latlng).addTo(map);
 
-            // Update hidden form fields
+            // Fjerner eksisterende nøyaktighetssirkel hvis den finnes
+            if (userLocationCircle) {
+                map.removeLayer(userLocationCircle);
+            }
+
+            // Legger til en markør på brukerens posisjon
+            marker = L.marker(e.latlng).addTo(map)
+                .bindPopup("Du er innenfor " + radius.toFixed(0) + " meter fra dette punktet")
+                .openPopup();
+
+            // Legger til en sirkel som viser nøyaktigheten til posisjonen
+            userLocationCircle = L.circle(e.latlng, radius).addTo(map);
+
+            // Oppdaterer de skjulte skjemafeltene med koordinatene
             document.getElementById('Latitude').value = e.latlng.lat;
             document.getElementById('Longitude').value = e.latlng.lng;
 
-            // Display selected location
+            // Viser den valgte lokasjonen i brukergrensesnittet
+            document.getElementById('latDisplay').textContent = e.latlng.lat.toFixed(6);
+            document.getElementById('lngDisplay').textContent = e.latlng.lng.toFixed(6);
+            document.getElementById('selectedLocation').classList.remove('hidden');
+        }
+
+        // Funksjon som kjøres hvis det oppstår en feil ved posisjonshenting
+        function onLocationError(e) {
+            console.error("Feil ved henting av posisjon:", e.message);
+            
+            // Fallback: Setter kartet til Oslo sentrum hvis posisjon ikke kan hentes
+            var fallbackLocation = [59.9139, 10.7522]; // Oslo sentrum
+            map.setView(fallbackLocation, 10);
+            
+            // Legger til en markør på fallback-posisjonen
+            marker = L.marker(fallbackLocation).addTo(map)
+                .bindPopup("Kunne ikke hente din posisjon. Kartet viser Oslo sentrum.")
+                .openPopup();
+
+            // Oppdaterer skjemafeltene med fallback-koordinater
+            document.getElementById('Latitude').value = fallbackLocation[0];
+            document.getElementById('Longitude').value = fallbackLocation[1];
+            
+            // Viser fallback-posisjonen i brukergrensesnittet
+            document.getElementById('latDisplay').textContent = fallbackLocation[0].toFixed(6);
+            document.getElementById('lngDisplay').textContent = fallbackLocation[1].toFixed(6);
+            document.getElementById('selectedLocation').classList.remove('hidden');
+
+            alert("Kunne ikke hente din posisjon. Vennligst velg en lokasjon manuelt på kartet.");
+        }
+
+        // Setter opp event listeners for geolokalisering
+        // 'locationfound' eventet trigges når posisjonen er hentet
+        map.on('locationfound', onLocationFound);
+        
+        // 'locationerror' eventet trigges hvis det oppstår en feil
+        map.on('locationerror', onLocationError);
+
+        // Starter sporing av brukerens posisjon
+        // Parameterne betyr:
+        // watch: true - Fortsetter å spore posisjonen
+        // setView: false - Ikke endre kartvisningen (vi gjør dette manuelt)
+        // maxZoom: 16 - Maksimalt zoomnivå for autosenterering
+        // timeout: 10000 - Maksimal ventetid på 10 sekunder
+        // maximumAge: 30000 - Aksepterer en posisjon som er opptil 30 sekunder gammel
+        map.locate({ 
+            watch: true, 
+            setView: false, 
+            maxZoom: 16,
+            timeout: 10000,
+            maximumAge: 30000
+        });
+
+        // Event listener for når brukeren klikker på kartet for å velge en annen posisjon
+        map.on('click', function (e) {
+            // Fjerner eksisterende markør
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Fjerner nøyaktighetssirkelen når bruker velger posisjon manuelt
+            if (userLocationCircle) {
+                map.removeLayer(userLocationCircle);
+            }
+
+            // Legger til ny markør på det klikkede stedet
+            marker = L.marker(e.latlng).addTo(map);
+
+            // Oppdaterer skjemafeltene med de nye koordinatene
+            document.getElementById('Latitude').value = e.latlng.lat;
+            document.getElementById('Longitude').value = e.latlng.lng;
+
+            // Oppdaterer visningen av koordinatene
             document.getElementById('latDisplay').textContent = e.latlng.lat.toFixed(6);
             document.getElementById('lngDisplay').textContent = e.latlng.lng.toFixed(6);
             document.getElementById('selectedLocation').classList.remove('hidden');
         });
 
-        // Optional: Add validation to ensure location is selected before form submission
+        // Validering for å sikre at en lokasjon er valgt før skjema sendes inn
         document.querySelector('form').addEventListener('submit', function (e) {
             var lat = document.getElementById('Latitude').value;
             var lng = document.getElementById('Longitude').value;
             
             if (!lat || !lng) {
-                e.preventDefault();
-                alert('Please select a location on the map before submitting.');
+                e.preventDefault(); // Stoppe skjemaets innsending
+                alert('Vennligst velg en lokasjon på kartet før du sender inn skjemaet.');
             }
         });
     </script>
