@@ -65,7 +65,7 @@
                         class="inline-flex items-center justify-center rounded-lg bg-gray-400 px-4 py-2 text-black hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400">
                     Submit Data
                 </button>
-                <a asp-controller="Home" asp-action="Index"
+                <a asp-controller="Home" asp-action="MainPage"
                    class="inline-flex items-center rounded-lg bg-gray-400 px-4 py-2 text-black ring-1 ring-gray-300 hover:bg-gray-400">
                     Back to Home
                 </a>
@@ -215,7 +215,7 @@
     </script>
 
     <!-- Client-side validation -->
-    <partial name="_ValidationScriptsPartial" />
+   @*  <partial name="_ValidationScriptsPartial" /> *@
 
     <script>
         // Change submit button text to "Submit Draft" when required fields are not filled.
