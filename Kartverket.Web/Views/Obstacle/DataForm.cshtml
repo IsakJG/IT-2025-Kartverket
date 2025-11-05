@@ -216,4 +216,65 @@
 
     <!-- Client-side validation -->
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Change submit button text to "Submit Draft" when required fields are not filled.
+        (function () {
+            var $form = $('form');
+            var $submit = $form.find('button[type="submit"]').first();
+            var originalText = $submit.text().trim();
+
+            function hasJQueryValidate() {
+                return typeof $form.valid === 'function';
+            }
+
+            function isFormValid() {
+                if (hasJQueryValidate()) {
+                    // Use jQuery Validate (unobtrusive) if present
+                    return $form.valid();
+                }
+
+                // Fallback: simple check for empty elements that have data-val-required attribute
+                var valid = true;
+                $form.find('[data-val-required]').each(function () {
+                    var $el = $(this);
+                    var val = $el.val();
+                    if (!val || val.toString().trim() === '') {
+                        valid = false;
+                        return false; // break each
+                    }
+                });
+                return valid;
+            }
+
+            function updateSubmitText() {
+                try {
+                    if (isFormValid()) {
+                        $submit.text(originalText);
+                    } else {
+                        $submit.text('Submit Draft');
+                    }
+                } catch (ex) {
+                    // if something goes wrong, don't block submission — keep original text
+                    console.error('updateSubmitText error', ex);
+                    $submit.text(originalText);
+                }
+            }
+
+            $(function () {
+                // initial update after validation scripts executed
+                setTimeout(updateSubmitText, 50);
+
+                // update on input/change
+                $form.on('input change keyup', 'input, textarea, select', function () {
+                    updateSubmitText();
+                });
+
+                // ensure label updated just before submit (user may click when state changed)
+                $form.on('submit', function () {
+                    updateSubmitText();
+                });
+            });
+        })();
+    </script>
 }
