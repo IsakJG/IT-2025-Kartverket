@@ -10,12 +10,11 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger; 
     private readonly IConfiguration config; 
    
-    //private readonly string _connectionString;
-    
         public HomeController(ILogger<HomeController> logger, IConfiguration config) 
         {
-            _logger = logger; 
-            this.config = config; 
+            _logger = logger;
+             this.config = config; 
+            
         }
         
 

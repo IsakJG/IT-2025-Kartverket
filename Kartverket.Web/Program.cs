@@ -1,13 +1,13 @@
 using System.Globalization;
-using MySqlConnector;
+using Kartverket.Web.Data.EF;
+using Microsoft.EntityFrameworkCore;
+using NetTopologySuite;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dependency Injection (Register services)
-// Get connection string directly from configuration in appsetting.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-// Register your service that uses the connection
-builder.Services.AddSingleton(new MySqlConnection(connectionString));
+
 
 // Setter kultur til en-US for � bruke engelsk tallformat
 var cultureInfo = new CultureInfo("en-US");
@@ -18,7 +18,15 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.AddMySqlDataSource(connectionName: "mysqldb");
+
+// EF Core DbContext (bruker "DefaultConnection" fra appsettings.json)
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<KartverketContext>(opt =>
+    opt.UseMySql(cs, ServerVersion.AutoDetect(cs),
+        my => my.UseNetTopologySuite())); // Viktig for POINT (GeoLocation)
+
+
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
