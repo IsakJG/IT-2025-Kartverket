@@ -65,7 +65,7 @@
                         class="inline-flex items-center justify-center rounded-lg bg-gray-400 px-4 py-2 text-black hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400">
                     Submit Data
                 </button>
-                <a asp-controller="Home" asp-action="Index"
+                <a asp-controller="Home" asp-action="MainPage"
                    class="inline-flex items-center rounded-lg bg-gray-400 px-4 py-2 text-black ring-1 ring-gray-300 hover:bg-gray-400">
                     Back to Home
                 </a>
@@ -215,5 +215,66 @@
     </script>
 
     <!-- Client-side validation -->
-    <partial name="_ValidationScriptsPartial" />
+   @*  <partial name="_ValidationScriptsPartial" /> *@
+
+    <script>
+        // Change submit button text to "Submit Draft" when required fields are not filled.
+        (function () {
+            var $form = $('form');
+            var $submit = $form.find('button[type="submit"]').first();
+            var originalText = $submit.text().trim();
+
+            function hasJQueryValidate() {
+                return typeof $form.valid === 'function';
+            }
+
+            function isFormValid() {
+                if (hasJQueryValidate()) {
+                    // Use jQuery Validate (unobtrusive) if present
+                    return $form.valid();
+                }
+
+                // Fallback: simple check for empty elements that have data-val-required attribute
+                var valid = true;
+                $form.find('[data-val-required]').each(function () {
+                    var $el = $(this);
+                    var val = $el.val();
+                    if (!val || val.toString().trim() === '') {
+                        valid = false;
+                        return false; // break each
+                    }
+                });
+                return valid;
+            }
+
+            function updateSubmitText() {
+                try {
+                    if (isFormValid()) {
+                        $submit.text(originalText);
+                    } else {
+                        $submit.text('Submit Draft');
+                    }
+                } catch (ex) {
+                    // if something goes wrong, don't block submission — keep original text
+                    console.error('updateSubmitText error', ex);
+                    $submit.text(originalText);
+                }
+            }
+
+            $(function () {
+                // initial update after validation scripts executed
+                setTimeout(updateSubmitText, 50);
+
+                // update on input/change
+                $form.on('input change keyup', 'input, textarea, select', function () {
+                    updateSubmitText();
+                });
+
+                // ensure label updated just before submit (user may click when state changed)
+                $form.on('submit', function () {
+                    updateSubmitText();
+                });
+            });
+        })();
+    </script>
 }
