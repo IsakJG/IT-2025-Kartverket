@@ -11,6 +11,7 @@ public partial class Report
     public string Title { get; set; } = null!;
 
     public int UserID { get; set; }
+
     public Point? GeoLocation { get; set; }
 
     public decimal HeightInFeet { get; set; }
@@ -20,9 +21,9 @@ public partial class Report
 
     public int? ImageID { get; set; }
 
-    public int StatusID { get; set; }
+    public int? StatusID { get; set; }
 
-    public int CategoryID { get; set; }
+    public int? CategoryID { get; set; }
 
     public string? Feedback { get; set; }
 
