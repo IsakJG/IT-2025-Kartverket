@@ -46,7 +46,24 @@
             <div class="mt-6">
                 <label class="block text-base font-medium text-gray-900 mb-2">Select Obstacle Location</label>
                 <p class="text-sm text-gray-600 mb-1">Click on the map to select the obstacle location</p>
-                <div id="map" style="height: 300px;" class="mb-4 border rounded shadow"></div>
+
+                <div class="flex gap-4 items-start mb-4">
+                  <!-- Kart (venstre) -->
+                <div id="map" style="height:300px; width:78%;" class="border rounded shadow"></div>
+
+                <!-- Pilot-vennlig toolbar (høyre) -->
+                <div class="flex flex-col gap-3" style="width:22%;">
+                    <button type="button" id="drawPointBtn"
+                            class="w-full py-4 rounded-xl text-white font-semibold text-lg"
+                            style="background:#2563eb;">📍 Point</button>
+                    <button type="button" id="drawLineBtn"
+                            class="w-full py-4 rounded-xl text-white font-semibold text-lg"
+                            style="background:#16a34a;">📏 Line</button>
+                    <button type="button" id="clearDrawBtn"
+                            class="w-full py-4 rounded-xl text-white font-semibold text-lg"
+                            style="background:#6b7280;">🧹 Clear</button>
+                  </div>
+                </div>
 
                 <!-- Skjulte felter for koordinater -->
                 <input type="hidden" asp-for="Latitude" id="Latitude" />
@@ -77,6 +94,16 @@
     </div>
 </section>
 
+<style>
+  /* større berøringsflater for nettbrett/hansker */
+  .leaflet-touch .leaflet-bar a {
+    width: 56px; height: 56px; line-height: 56px; font-size: 18px;
+  }
+  /* litt luft fra kanter */
+  .leaflet-left .leaflet-control { margin-left: 14px; }
+  .leaflet-top  .leaflet-control { margin-top: 14px; }
+</style>
+
 @section Scripts {
     <!-- Include Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -93,6 +120,8 @@
         var marker; // Variabel for å holde på markøren
         var userLocationCircle; // Variabel for nøyaktighetssirkelen
         var hasCentered = false; // Hindrer gjentatt re-sentrering
+        var activeDrawer = null; // referanse til aktivt tegneverktøy
+        var isDrawing   = false; // om vi er i tegne-modus
 
         // Legger til OpenStreetMap som bakgrunnskart
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -106,12 +135,38 @@
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
 
-        // Verktøylinje (kun marker og polyline for dette issuet)
-        var drawControl = new L.Control.Draw({
-            draw: { polygon: false, circle: false, rectangle: false, marker: true, polyline: true },
-            edit: { featureGroup: drawnItems }
-        });
-        map.addControl(drawControl);
+            // Skjul Leaflet.Draw-ikon-toolbar – vi styrer tegning via egne knapper
+            var drawControl = new L.Control.Draw({ draw: false, edit: false });
+
+            // Funksjon for å starte tegning fra knapp
+            function startDraw(type) {
+            // deaktiver forrige verktøy hvis noe sto på
+            if (activeDrawer) { activeDrawer.disable(); activeDrawer = null; }
+            isDrawing = true;
+
+            if (type === 'marker') {
+              activeDrawer = new L.Draw.Marker(map, drawControl.options.marker || {});
+            } else if (type === 'polyline') {
+            activeDrawer = new L.Draw.Polyline(map, drawControl.options.polyline || {});
+         }
+         activeDrawer.enable();
+        }
+
+    // Koble knappene til Leaflet.Draw
+    document.getElementById('drawPointBtn').addEventListener('click', function () {
+      startDraw('marker');
+    });
+    document.getElementById('drawLineBtn').addEventListener('click', function () {
+      startDraw('polyline');
+    });
+    document.getElementById('clearDrawBtn').addEventListener('click', function () {
+      drawnItems.clearLayers();
+      captureGeoJson();
+    });
+
+    // Hold tegnemodus oppdatert
+    map.on('draw:drawstart',  function(){ isDrawing = true;  });
+    map.on('draw:drawstop',   function(){ isDrawing = false; activeDrawer = null; });
 
         // Når noe tegnes -> legg det til og oppdater skjulte felter
         map.on(L.Draw.Event.CREATED, function (e) {
@@ -244,6 +299,7 @@
 
         // Event listener for når brukeren klikker på kartet for å velge en annen posisjon
         map.on('click', function (e) {
+            if (isDrawing) return; // ignorerer klikk mens tegneverktøy er aktivt
             // Fjerner eksisterende markør
             if (marker) {
                 map.removeLayer(marker);
