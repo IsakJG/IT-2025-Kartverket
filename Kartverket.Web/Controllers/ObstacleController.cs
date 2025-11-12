@@ -18,12 +18,17 @@ public class ObstacleController : Controller
     [HttpPost]
     public ActionResult DataForm(ObstacleData obstacledata) // POST
     {
-        bool isDraft = false; 
-        if (obstacledata.ObstacleDescription == null) 
-        { 
-            isDraft = true; 
+        bool isDraft = false;
+        if (obstacledata.ObstacleDescription == null)
+        {
+            isDraft = true;
         }
 
-        return View("Overview", obstacledata); 
+        return View("Overview", obstacledata);
+    }
+    
+    public IActionResult Map()
+    {
+        return View();
     }
 }
