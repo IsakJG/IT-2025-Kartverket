@@ -1,0 +1,103 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Validate Report";
+    var reportId = Model.ReportId;
+}
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Validate Report #@reportId</h1>
+        <p class="text-gray-600 mt-2">Review and approve or reject this obstacle report</p>
+    </div>
+
+    <!-- Report Details Card -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Report Details</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Report ID</label>
+                <p class="mt-1 text-lg font-semibold text-gray-900">#@Model.ReportId</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Obstacle Type</label>
+                <p class="mt-1 text-lg text-gray-900">@Model.ObstacleType</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Position</label>
+                <p class="mt-1 text-gray-900">@Model.Position</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Height</label>
+                <p class="mt-1 text-gray-900">@Model.Height</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Reported By</label>
+                <p class="mt-1 text-gray-900">@Model.CreatedBy</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Report Date</label>
+                <p class="mt-1 text-gray-900">@Model.Date</p>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p class="text-gray-700 leading-relaxed">@Model.Description</p>
+            </div>
+        </div>
+
+        <!-- Kart-visning (enkel) -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Location on Map</label>
+            <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 text-center">
+                <p class="text-gray-600">🗺️ Map visualization would appear here</p>
+                <p class="text-sm text-gray-500 mt-2">Coordinates: @Model.Position</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Review Action</h3>
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+            <!-- Approve Button -->
+            <form asp-action="ApproveReport" method="post" class="flex-1">
+                <input type="hidden" name="reportId" value="@reportId" />
+                <button type="submit" 
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">✅</span>
+                    Approve Report
+                </button>
+            </form>
+
+            <!-- Reject Button -->
+            <form asp-action="RejectReport" method="post" class="flex-1">
+                <input type="hidden" name="reportId" value="@reportId" />
+                <button type="submit" 
+                        class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                    <span class="mr-2">❌</span>
+                    Reject Report
+                </button>
+            </form>
+
+            <!-- Back Button -->
+            <a asp-action="Index" 
+               class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 text-center">
+                ← Back to Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["Message"] != null)
+    {
+        <div class="mt-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            @TempData["Message"]
+        </div>
+    }
+</div>

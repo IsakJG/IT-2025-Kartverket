@@ -1,7 +1,15 @@
 ﻿@{
-    ViewData["Title"] = "AdminPage";
+    ViewData["Title"] = "Active Reports";
 }
 <h1 class="text-2xl font-semibold mb-4">@ViewData["Title"]</h1>
+
+<!-- Success Message -->
+@if (TempData["Message"] != null)
+{
+    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+        @TempData["Message"]
+    </div>
+}
 
 <!--Tabell (Nåverende data er kun dummydata)-->
 <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -29,42 +37,72 @@
         <!--Rader-->
         <tbody class="bg-white divide-y divide-gray-100">
             <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
-                <td class="px-4 py-3 text-sm text-gray-700">1001</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                    <a asp-controller="Admin" asp-action="ValidateReport" asp-route-reportId="1001" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        1001
+                    </a>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">59.9139, 10.7522</td>
                 <td class="px-4 py-3 text-sm text-gray-700">12.3 m</td>
                 <td class="px-4 py-3 text-sm text-gray-700">Ingrid Hansen</td>
                 <td class="px-4 py-3 text-sm text-gray-700">2025-10-20 09:15</td>
             </tr>
             <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
-                <td class="px-4 py-3 text-sm text-gray-700">1002</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                    <a asp-controller="Admin" asp-action="ValidateReport" asp-route-reportId="1002" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        1002
+                    </a>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">60.3913, 5.3221</td>
                 <td class="px-4 py-3 text-sm text-gray-700">5.0 m</td>
                 <td class="px-4 py-3 text-sm text-gray-700">Ola Nordmann</td>
                 <td class="px-4 py-3 text-sm text-gray-700">2025-10-21 14:42</td>
             </tr>
             <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
-                <td class="px-4 py-3 text-sm text-gray-700">1003</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                    <a asp-controller="Admin" asp-action="ValidateReport" asp-route-reportId="1003" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        1003
+                    </a>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">63.4305, 10.3951</td>
                 <td class="px-4 py-3 text-sm text-gray-700">23.7 m</td>
                 <td class="px-4 py-3 text-sm text-gray-700">Maria Berg</td>
                 <td class="px-4 py-3 text-sm text-gray-700">2025-10-22 11:03</td>
             </tr>
             <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
-                <td class="px-4 py-3 text-sm text-gray-700">1004</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                    <a asp-controller="Admin" asp-action="ValidateReport" asp-route-reportId="1004" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        1004
+                    </a>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">58.9690, 5.7331</td>
                 <td class="px-4 py-3 text-sm text-gray-700">0.8 m</td>
                 <td class="px-4 py-3 text-sm text-gray-700">Karl Olsen</td>
                 <td class="px-4 py-3 text-sm text-gray-700">2025-10-23 16:27</td>
             </tr>
             <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
-                <td class="px-4 py-3 text-sm text-gray-700">1005</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                    <a asp-controller="Admin" asp-action="ValidateReport" asp-route-reportId="1005" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        1005
+                    </a>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">61.2461, 10.4209</td>
                 <td class="px-4 py-3 text-sm text-gray-700">7.5 m</td>
                 <td class="px-4 py-3 text-sm text-gray-700">Eva Larsen</td>
                 <td class="px-4 py-3 text-sm text-gray-700">2025-10-24 08:50</td>
             </tr>
             <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
-                <td class="px-4 py-3 text-sm text-gray-700">1006</td>
+                <td class="px-4 py-3 text-sm text-gray-700">
+                    <a asp-controller="Admin" asp-action="ValidateReport" asp-route-reportId="1006" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                        1006
+                    </a>
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">59.9115, 10.7579</td>
                 <td class="px-4 py-3 text-sm text-gray-700">15.2 m</td>
                 <td class="px-4 py-3 text-sm text-gray-700">Per Johansen</td>
