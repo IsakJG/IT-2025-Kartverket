@@ -1,13 +1,9 @@
 using System.Globalization;
-using MySqlConnector;
+using Microsoft.EntityFrameworkCore;
+using Kartverket.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dependency Injection (Register services)
-// Get connection string directly from configuration in appsetting.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-// Register your service that uses the connection
-builder.Services.AddSingleton(new MySqlConnection(connectionString));
 
 // Setter kultur til en-US for � bruke engelsk tallformat
 var cultureInfo = new CultureInfo("en-US");
@@ -16,10 +12,24 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 builder.AddServiceDefaults();
 
+var connectionString =
+    builder.Configuration.GetConnectionString("kartverketdb")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string for database not found.");
+
+builder.Services.AddDbContext<KartverketDbContext>(options =>
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.AddMySqlDataSource(connectionName: "mysqldb");
+
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<KartverketDbContext>();
+    db.Database.EnsureCreated();   // Lager tabeller i kartverketdb (eller databasen connection string peker på)
+}
+
 
 app.MapDefaultEndpoints();
 
