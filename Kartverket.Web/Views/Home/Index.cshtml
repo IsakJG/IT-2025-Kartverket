@@ -3,31 +3,38 @@
     ViewData["Title"] = "Kartverket";
 }
 
-<section class="mx-auto max-w-3xl">
-    <div class="text-center space-y-4">
-        <div class="space-y-4">
-            <h1 class="text-4xl sm:text-5xl font-normal tracking-wide text-gray-920">
+<section class="mx-auto max-w-sm pt-10">
+    <div class="text-center space-y-6">
+
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img src="~/images/KartverketLogo.svg"
+                 alt="Kartverket"
+                 class="h-20 w-auto" />
+        </div>
+
+        <!-- Title -->
+        <div class="space-y-1">
+            <h1 class="text-5xl font-medium tracking-wide text-gray-900">
                 WELCOME TO
             </h1>
-            <h2 class="text-4xl sm:text-5xl font-normal tracking-wide text-gray-920">
+            <h2 class="text-5xl font-semibold tracking-wide text-gray-900">
                 KARTVERKET
             </h2>
         </div>
-        <div class="flex justify-center pl-4">
-            <img src="~/images/Kartverketlogo.svg"
-                 alt="Kartverket"
-                 class="h-30 w-auto" />
-        </div>
-        @if (!string.IsNullOrWhiteSpace(Model))
-        {
-            <p class="text-gray-800">@Model</p>
-        }
+
+        <!-- Subtitle -->
+        <p class="text-gray-700 text-2xl">
+            Register aviation obstacles<br />and manage reports securely.
+        </p>
+
+        <!-- Sign in button -->
         <div class="pt-4">
             <a asp-action="LogInBruker" asp-controller="LogIn"
-               class="block w-full max-w-sm mx-auto px-8 py-10 text-xl sm:text-2xl font-medium tracking-wide text-gray-900 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors duration-200">
-                Sign In
+               class="block w-full px-8 py-6 text-xl font-semibold tracking-wide text-white bg-green-800 rounded-full hover:bg-green-900 transition">
+                SIGN IN
             </a>
         </div>
+
     </div>
 </section>
-
