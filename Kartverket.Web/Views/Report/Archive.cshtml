@@ -1,26 +1,81 @@
-﻿@{
+﻿@model IEnumerable<Kartverket.Web.Models.ArchiveRow>
+
+@{
     ViewData["Title"] = "Report Archive";
 }
 
-<section class="mx-auto max-w-4xl py-8">
-    <h1 class="text-4xl font-semibold text-center mb-8">Report Archive</h1>
+<h1 class="text-2xl font-semibold mb-4">@ViewData["Title"]</h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        @foreach (var report in new[] {
-                new { Id = 1, Title = "Mountain top", Description = "Terrain that  is up into the flight path" },
-                new { Id = 2, Title = "Wind turbines", Description = "A wind turbine in the way of the path" },
-                new { Id = 3, Title = "High voltage line", Description = "Tall structure in the way" }
-                })
-        {
-            <div class="bg-gray-300 rounded-lg p-4 shadow">
-                <h2 class="text-xl font-bold">@report.Title</h2>
-                <p class="text-gray-800 mb-3">@report.Description</p>
-                <a asp-action="Details" asp-controller="Report" asp-route-id="@report.Id"
-                   class="inline-block bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium px-4 py-2 rounded">
-                    Open
-                </a>
+@if (!Model.Any())
+{
+    <p class="text-gray-600">No reports found.</p>
+}
+else
+{
+    <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+        <table class="min-w-full table-auto divide-y divide-gray-200">
+            <!-- Kolonne-headere -->
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Report ID
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Title
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Submitted by
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Status
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Height (ft)
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Date
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        Open Report
+                    </th>
+                </tr>
+            </thead>
 
-            </div>
-        }
+            <!-- Rader -->
+            <tbody class="bg-white divide-y divide-gray-100">
+                @foreach (var report in Model)
+                {
+                    <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @report.ReportID
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @report.Title
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @report.Pilot
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @report.Status
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">
+                            @report.HeightInFeet
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @report.CreatedAt?.ToString("yyyy-MM-dd HH:mm")
+                        </td>
+                        
+                        <td class="px-4 py-3 text-sm text-right">
+                            <a asp-action="Details"
+                               asp-controller="Report"
+                               asp-route-id="@report.ReportID"
+                               class="inline-flex items-center rounded-md bg-gray-800 text-white px-3 py-1 text-xs font-medium hover:bg-gray-700">
+                                Open
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-</section>
+}

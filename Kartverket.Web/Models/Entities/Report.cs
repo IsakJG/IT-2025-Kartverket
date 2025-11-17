@@ -29,7 +29,7 @@ public class Report
     // Vanlige felter
     public string? Title { get; set; }              // TinyText i ER-diagrammet
     public string? GeoLocation { get; set; }        // GeoJSON som string
-    public short? HeightInFeet { get; set; }        // SmallInt
+    public double HeightInFeet { get; set; }        // SmallInt
     public string? Description { get; set; }        // MediumText
 
     public DateTime? AssignedAt { get; set; }       // TIMESTAMP

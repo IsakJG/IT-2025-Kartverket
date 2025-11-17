@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Kartverket.Web.Data;
 using Kartverket.Web.Models.Entities;
 using System.Text.Json;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,9 +19,21 @@ var connectionString =
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string for database not found.");
 
-builder.Services.AddDbContext<KartverketDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+var serverVersion = new MySqlServerVersion(new Version(10, 11, 0)); // f.eks. MariaDB 10.11
 
+//builder.Services.AddDbContext<KartverketDbContext>(options =>
+  //  options.UseMySql(connectionString, serverVersion));
+
+  builder.Services.AddDbContext<KartverketDbContext>(options =>
+{
+    options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+    {
+        mySqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null);
+    });
+});
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -42,7 +55,7 @@ app.UseSession();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<KartverketDbContext>();
-    db.Database.EnsureCreated();   // Lager tabeller i kartverketdb (eller databasen connection string peker på)
+    db.Database.Migrate();   // Lager tabeller i kartverketdb (eller databasen connection string peker på)
 
     //Sjekk om Status-tabellen er tom, og legg til standardverdier hvis den er det
     if (!db.Statuses.Any())

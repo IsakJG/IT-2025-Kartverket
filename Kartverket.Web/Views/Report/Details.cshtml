@@ -1,4 +1,4 @@
-﻿@model dynamic
+﻿@model Kartverket.Web.Models.ArchiveRow
 @{
     ViewData["Title"] = "Report Details";
 }
@@ -7,26 +7,31 @@
     <h1 class="text-4xl font-semibold text-center mb-6">@Model.Title</h1>
 
     <div class="bg-gray-300 rounded-lg p-6 shadow mb-6">
-        <p><strong>Height:</strong> @Model.HeightFeet ft</p>
+        <p><strong>Submitted by:</strong> @Model.Pilot</p>
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Category:</strong> @Model.Category</p>
+        <p><strong>Height:</strong> @Model.HeightInFeet ft</p>
         <p><strong>Description:</strong> @Model.Description</p>
-    </div>
+        <p><strong>Create date:</strong> @Model.CreatedAt?.ToString("yyyy-MM-dd HH:mm")</p>
+                    
+       </div>
 
     <div id="map" class="w-full h-64 rounded-lg shadow mb-6"></div>
+
+    <a asp-controller="Report" asp-action="Archive"
+       class="inline-block bg-gray-400 hover:bg-gray-500 text-gray-900 font-medium px-4 py-2 rounded">
+       Back to archive
+    </a>
 </section>
 
-<!-- Leaflet CSS & JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-    var map = L.map('map').setView([@Model.Latitude, @Model.Longitude], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
-        .bindPopup('@Model.Title')
-        .openPopup();
+    const lat = @(Model.Latitude ?? 0);
+    const lon = @(Model.Longitude ?? 0);
+    const map = L.map('map').setView([lat, lon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
 </script>
+
 
