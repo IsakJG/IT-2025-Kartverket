@@ -68,7 +68,7 @@ public class KartverketDbContext : DbContext
             .HasMaxLength(255)
             .IsRequired();
 
-            e.Property(u => u.Password)
+            e.Property(u => u.PasswordHash)
             .HasMaxLength(255)
             .IsRequired();
         });

@@ -51,26 +51,130 @@
                  class="hidden w-full md:w-auto md:flex md:items-center md:gap-6">
                 <ul class="mt-3 flex flex-col gap-2 md:mt-0 md:flex-row md:items-center">
                     <li>
-                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                           asp-area="" asp-controller="Home" asp-action="MainPage">Home</a>
+                        @{
+                            var isLoggedIn = Context.Session.GetInt32("UserId").HasValue;
+                            var userRoles = Context.Session.GetString("UserRoles")?.Split(',') ?? Array.Empty<string>();
+                            var username = Context.Session.GetString("Username") ?? "";
+                        }
+                        @if (isLoggedIn)
+                        {
+                            @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                            {
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Registrar" asp-action="RegisterMetode">
+                                    Home
+                                </a>
+                            }
+                            else if (userRoles.Contains("Admin"))
+                            {
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Admin" asp-action="Index">
+                                    Home
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Home" asp-action="MainPage">
+                                    Home
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                               asp-controller="Home" asp-action="MainPage">
+                                Home
+                            </a>
+                        }
                     </li>
                     
-                    <li>
-                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                           asp-area="" asp-controller="Home" asp-action="Index">Sign out</a>
-                    </li>
-                       <li>
-                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                           asp-area="" asp-controller="Registrar" asp-action="RegisterMetode">MainPage Registrar</a>
-                    </li>
-
+                    <!-- Dynamiske lenker basert på innlogging og roller -->
+                    @if (isLoggedIn)
+                    {
+                        <!-- Logged in user menu -->
+                        <li>
+                            <span class="block rounded-md px-3 py-2 text-gray-700 font-medium">
+                                Hei, @username
+                            </span>
+                        </li>
+                        
+                        <!-- Admin lenker -->
+                        @if (userRoles.Contains("Admin"))
+                        {
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+                            </li>
+                        }
+                        
+                        <!-- Registrar lenker -->
+                        @if (userRoles.Contains("Registrar"))
+                        {
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Registrar" asp-action="RegisterMetode">Registrar Dashboard</a>
+                            </li>
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Report" asp-action="ActiveReports">Review Reports</a>
+                            </li>
+                        }
+                        
+                        <!-- Pilot lenker -->
+                        @if (userRoles.Contains("Pilot"))
+                        {
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Obstacle" asp-action="DataForm">Report Obstacle</a>
+                            </li>
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Report" asp-action="Archive">View Archive</a>
+                            </li>
+                        }
+                        
+                        <!-- Logout for alle innloggede -->
+                        <li>
+                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                               asp-controller="Auth" asp-action="Logout">Logg Ut</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <!-- Not logged in menu -->
+                        <li>
+                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                               asp-controller="Auth" asp-action="Login">Logg Inn</a>
+                        </li>
+                        <li>
+                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                               asp-controller="Auth" asp-action="Register">Registrer</a>
+                        </li>
+                    }
                 </ul>
-
-
-
             </div>
         </nav>
     </header>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="container mt-4">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="container mt-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                @TempData["ErrorMessage"]
+            </div>
+        </div>
+    }
 
     <!-- Main -->
     <div class="container flex-1 w-full">

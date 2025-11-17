@@ -1,7 +1,7 @@
 @{
     ViewData["Title"] = "Main Page";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var username = (User?.Identity?.IsAuthenticated ?? false) ? User.Identity!.Name : "Username";
+    var username = Context.Session.GetString("Username") ?? "Username";
 }
 
 <main class="min-h-[calc(100vh-64px)]">
@@ -11,14 +11,14 @@
     <!-- Tre store runde knapper -->
     <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
       <!-- Active Reports -->
-      <a asp-controller="Admin" asp-action="Index"
+      <a asp-controller="Report" asp-action="ActiveReports"
          class="inline-flex items-center justify-center rounded-full shadow-md border px-10 py-8 sm:px-12 sm:py-10
                 text-xl sm:text-2xl font-medium bg-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition"
          style="border-radius: 9999px;">
         Active<br class="hidden sm:block"> Reports
       </a>
 
-      <!-- NY: Map knapp -->
+      <!-- Map knapp -->
       <a asp-controller="Obstacle" asp-action="Map"
          class="inline-flex items-center justify-center rounded-full shadow-md border px-10 py-8 sm:px-12 sm:py-10
                 text-xl sm:text-2xl font-medium bg-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition"

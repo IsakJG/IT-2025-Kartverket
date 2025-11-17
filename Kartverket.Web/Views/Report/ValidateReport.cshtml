@@ -1,4 +1,4 @@
-@model dynamic
+@model Kartverket.Web.Models.Entities.Report
 @{
     ViewData["Title"] = "Validate Report";
     var reportId = Model.ReportId;
@@ -22,23 +22,23 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Obstacle Type</label>
-                <p class="mt-1 text-lg text-gray-900">@Model.ObstacleType</p>
+                <p class="mt-1 text-lg text-gray-900">@Model.Category?.CategoryName</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Position</label>
-                <p class="mt-1 text-gray-900">@Model.Position</p>
+                <p class="mt-1 text-gray-900">@Model.GeoLocation</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Height</label>
-                <p class="mt-1 text-gray-900">@Model.Height</p>
+                <p class="mt-1 text-gray-900">@Model.HeightInFeet feet</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Reported By</label>
-                <p class="mt-1 text-gray-900">@Model.CreatedBy</p>
+                <p class="mt-1 text-gray-900">@Model.User?.Username</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Report Date</label>
-                <p class="mt-1 text-gray-900">@Model.Date</p>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <p class="mt-1 text-gray-900">@Model.Status?.StatusName</p>
             </div>
         </div>
 
@@ -47,15 +47,6 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <p class="text-gray-700 leading-relaxed">@Model.Description</p>
-            </div>
-        </div>
-
-        <!-- Kart-visning (enkel) -->
-        <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Location on Map</label>
-            <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 text-center">
-                <p class="text-gray-600">🗺️ Map visualization would appear here</p>
-                <p class="text-sm text-gray-500 mt-2">Coordinates: @Model.Position</p>
             </div>
         </div>
     </div>
@@ -86,18 +77,10 @@
             </form>
 
             <!-- Back Button -->
-            <a asp-action="Index" 
+            <a asp-action="ActiveReports" 
                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 text-center">
                 ← Back to Reports
             </a>
         </div>
     </div>
-
-    <!-- Success Message -->
-    @if (TempData["Message"] != null)
-    {
-        <div class="mt-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-            @TempData["Message"]
-        </div>
-    }
 </div>
