@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Kartverket.Web.Data;
 using Kartverket.Web.Models.Entities;
+using Kartverket.Web.Models;
+using System.Text.Json;
+
 
 public class ReportController : Controller 
 {
@@ -11,8 +14,7 @@ public class ReportController : Controller
     {
         _context = context;
     }
-
-    // NY: Active Reports fra database
+    // NY: Active Reports fra database (denne beholdes som han lagde den)
     public async Task<IActionResult> ActiveReports() 
     {
         var activeReports = await _context.Reports
@@ -24,31 +26,113 @@ public class ReportController : Controller
 
         return View(activeReports);
     }
-
-    // Eksisterende: Archive med statisk data (behold denne)
-    public IActionResult Archive() 
+    //Archive view
+    public async Task<IActionResult> Archive()
     {
-        return View(Reports); 
-    }
+        var reports = await _context.Reports
+            .Include(r => r.User)
+            .Include(r => r.Status)
+            .Include(r => r.Category)
+            .Include(r => r.TimestampEntry)
+            .OrderByDescending(r => r.ReportId)
+            .ToListAsync();
 
-    // Eksisterende: Details med statisk data (behold denne)
-    public IActionResult Details(int id)
-    {
-        var report = Reports.FirstOrDefault(r => r.Id == id);
-        if (report == null)
+        var data = reports.Select(r =>
         {
-            return NotFound();
-        }
-        return View(report);
-    }
+            double? lat = null;
+            double? lng = null;
 
-    // Eksisterende statisk data (behold denne)
-    private static readonly List<dynamic> Reports = new() 
+            // GeoLocation parsing (fra din kode)
+            if (!string.IsNullOrWhiteSpace(r.GeoLocation))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(r.GeoLocation);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("lat", out var latProp))
+                        lat = latProp.GetDouble();
+
+                    if (root.TryGetProperty("lng", out var lngProp))
+                        lng = lngProp.GetDouble();
+                }
+                catch { } // Ignorer feilformatert JSON
+            }
+
+            return new ArchiveRow
+            {
+                ReportID     = r.ReportId,
+                Title        = r.Title,
+                Pilot        = r.User?.Username,
+                Status       = r.Status?.StatusName,
+                Category     = r.Category?.CategoryName,
+                HeightInFeet = r.HeightInFeet,
+                Description  = r.Description,
+                Latitude     = lat,
+                Longitude    = lng,
+                AssignedAt   = r.AssignedAt,
+                DecisionAt   = r.DecisionAt,
+                CreatedAt    = r.TimestampEntry != null
+                               ? r.TimestampEntry.DateCreated
+                               : (DateTime?)null
+            };
+        }).ToList();
+
+        return View(data);
+    }
+    // NY: Detaljside for en rapport
+    public async Task<IActionResult> Details(int id)
     {
-        new { Id = 1, Title = "Mountain top", Description = "Terrain that is up into the flight path", HeightFeet = 1400, Latitude = 58.1467, Longitude = 8.0089 }, 
-        new { Id = 2, Title = "Wind turbines", Description = "A wind turbine in the way of the path", HeightFeet = 300, Latitude = 58.1500, Longitude = 8.0100 }, 
-        new { Id = 3, Title = "High voltage line", Description = "Tall structure in the way", HeightFeet = 200, Latitude = 58.1550, Longitude = 8.0150 } 
-    };
+        var r = await _context.Reports
+            .Include(rep => rep.User)
+            .Include(rep => rep.Status)
+            .Include(rep => rep.Category)
+            .Include(rep => rep.TimestampEntry)
+            .FirstOrDefaultAsync(rep => rep.ReportId == id);
+
+        if (r == null)
+            return NotFound();
+
+        double? lat = null;
+        double? lng = null;
+
+        // GeoLocation parsing
+        if (!string.IsNullOrWhiteSpace(r.GeoLocation))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(r.GeoLocation);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("lat", out var latProp))
+                    lat = latProp.GetDouble();
+
+                if (root.TryGetProperty("lng", out var lngProp))
+                    lng = lngProp.GetDouble();
+            }
+            catch { }
+        }
+
+        var row = new ArchiveRow
+        {
+            ReportID     = r.ReportId,
+            Title        = r.Title,
+            Pilot        = r.User?.Username,
+            Status       = r.Status?.StatusName,
+            Category     = r.Category?.CategoryName,
+            HeightInFeet = r.HeightInFeet,
+            Description  = r.Description,
+            Latitude     = lat,
+            Longitude    = lng,
+            AssignedAt   = r.AssignedAt,
+            DecisionAt   = r.DecisionAt,
+            CreatedAt    = r.TimestampEntry != null
+                           ? r.TimestampEntry.DateCreated
+                           : (DateTime?)null
+        };
+
+        return View(row);
+    }
 
     // NY: Validation og godkjenning/avvisning (flyttet fra AdminController)
     public async Task<IActionResult> ValidateReport(int reportId)
@@ -88,4 +172,5 @@ public class ReportController : Controller
         }
         return RedirectToAction("ActiveReports");
     }
+   
 }
