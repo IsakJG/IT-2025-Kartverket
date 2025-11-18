@@ -148,6 +148,7 @@ public class ReportController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ApproveReport(int reportId)
     {
         var report = await _context.Reports.FindAsync(reportId);
@@ -161,6 +162,7 @@ public class ReportController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RejectReport(int reportId)
     {
         var report = await _context.Reports.FindAsync(reportId);

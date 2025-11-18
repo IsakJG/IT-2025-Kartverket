@@ -26,6 +26,7 @@ namespace Kartverket.Web.Controllers
 
         // POST: Behandle registrering
         [HttpPost]
+        [ValidateAntiForgeryToken] //Legger til beskyttelse mot CSRF på alle POST-forespørsler
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
@@ -96,6 +97,7 @@ namespace Kartverket.Web.Controllers
 
         // POST: Behandle login
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LogIn model)
         {
             if (ModelState.IsValid)

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Kartverket.Web</title>
 
+    <!-- CSRF Token for AJAX requests -->
+    @{
+        var antiforgery = Context.RequestServices.GetService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
+        var tokens = antiforgery?.GetAndStoreTokens(Context);
+    }
+    <meta name="csrf-token" content="@tokens?.RequestToken" />
+
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script> 
     <script>
@@ -15,6 +22,41 @@
             }
           }
         }
+
+        // CSRF token setup for AJAX requests
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : 
+                             (csrfTokenInput ? csrfTokenInput.value : '');
+            
+            if (!csrfToken) return;
+
+            // Set up jQuery AJAX to include CSRF token
+            if (typeof jQuery !== 'undefined') {
+                $.ajaxSetup({
+                    headers: {
+                        'RequestVerificationToken': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+            }
+
+            // Set up fetch to include CSRF token
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const [url, options = {}] = args;
+                if (options.method && options.method.toLowerCase() !== 'get') {
+                    options.headers = {
+                        ...options.headers,
+                        'RequestVerificationToken': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                }
+                return originalFetch(url, options);
+            };
+        });
     </script>
 
     <!-- Leaflet -->
@@ -26,6 +68,9 @@
     <link rel="stylesheet" href="~/Kartverket.Web.styles.css" asp-append-version="true" />
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900"> 
+    <!-- CSRF Token hidden field for form submissions -->
+    @Html.AntiForgeryToken()
+
     <!-- Header / Nav -->
     <header class="border-b bg-white">
         <nav class="container flex items-center justify-between py-3">
@@ -136,8 +181,13 @@
                         
                         <!-- Logout for alle innloggede -->
                         <li>
-                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                               asp-controller="Auth" asp-action="Logout">Logg Ut</a>
+                            <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" 
+                                        class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700 text-left w-full">
+                                    Logg Ut
+                                </button>
+                            </form>
                         </li>
                     }
                     else
@@ -206,6 +256,27 @@
             primaryNav.classList.toggle('hidden');
           });
         }
+
+        // Auto-add CSRF token to all forms
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            const csrfTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            
+            if (!csrfTokenInput) return;
+            
+            const csrfToken = csrfTokenInput.value;
+            
+            forms.forEach(form => {
+                // Skip if form already has CSRF token
+                if (!form.querySelector('input[name="__RequestVerificationToken"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = '__RequestVerificationToken';
+                    hiddenInput.value = csrfToken;
+                    form.appendChild(hiddenInput);
+                }
+            });
+        });
     </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

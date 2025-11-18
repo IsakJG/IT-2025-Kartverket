@@ -7,7 +7,7 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Setter kultur til en-US for � bruke engelsk tallformat
+// Setter kultur til en-US for å bruke engelsk tallformat
 var cultureInfo = new CultureInfo("en-US");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
@@ -21,10 +21,7 @@ var connectionString =
 
 var serverVersion = new MySqlServerVersion(new Version(10, 11, 0)); // f.eks. MariaDB 10.11
 
-//builder.Services.AddDbContext<KartverketDbContext>(options =>
-  //  options.UseMySql(connectionString, serverVersion));
-
-  builder.Services.AddDbContext<KartverketDbContext>(options =>
+builder.Services.AddDbContext<KartverketDbContext>(options =>
 {
     options.UseMySql(connectionString, serverVersion, mySqlOptions =>
     {
@@ -34,24 +31,90 @@ var serverVersion = new MySqlServerVersion(new Version(10, 11, 0)); // f.eks. Ma
             errorNumbersToAdd: null);
     });
 });
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// NY: Legg til Session support for identitetshåndtering
+// 🔒 LEGG TIL HSTS KONFIGURASJON
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.ExcludedHosts.Clear();
+});
+
+// 🔒 FORBEDRET SESSION KONFIGURASJON MED SIKKERHET
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
+    options.Cookie.HttpOnly = true; // Forhindrer JavaScript tilgang
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Kun HTTPS
+    options.Cookie.SameSite = SameSiteMode.Strict; // CSRF-beskyttelse
     options.Cookie.IsEssential = true;
     options.Cookie.Name = "Kartverket.Session";
 });
 
+// 🔒 ANTI-FORGERY KONFIGURASJON
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.SuppressXFrameOptionsHeader = false;
+});
+
 var app = builder.Build();
 
-// NY: Bruk Session middleware før Authorization
+// 🔒 BRUK HSTS I PRODUKSJON
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+
+// 🔒 SECURITY HEADERS MIDDLEWARE
+app.Use(async (context, next) =>
+{
+    // Content Security Policy
+    context.Response.Headers.Append("Content-Security-Policy", 
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.tailwindcss.com; " +
+        "style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.tailwindcss.com; " +
+        "img-src 'self' data: https:; " +
+        "connect-src 'self'; " +
+        "font-src 'self'; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self';");
+    
+    // XSS Protection
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    
+    // MIME-type sniffing beskyttelse
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    
+    // Clickjacking beskyttelse
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    
+    // Referrer Policy
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    
+    // Permissions Policy
+    context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+    
+    await next();
+});
+
+app.UseStaticFiles();
+app.UseRouting();
+
+// 🔒 BRUK SESSION MIDDLEWARE FØR AUTHORIZATION
 app.UseSession();
 
+app.UseAuthorization();
+
+// Database seeding og migrering
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<KartverketDbContext>();
@@ -166,26 +229,17 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapDefaultEndpoints();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles(); // Legg til denne for statiske filer (CSS, JS, bilder)
-app.UseRouting();
-
-app.UseAuthorization();
-
 app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+// 🔒 ERROR HANDLING FOR PRODUKSJON
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+}
 
 app.Run();
