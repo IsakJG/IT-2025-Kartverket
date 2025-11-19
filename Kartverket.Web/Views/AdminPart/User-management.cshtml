@@ -1,0 +1,205 @@
+﻿@using Kartverket.Web.Models
+@model IEnumerable<UserAdminViewModel>
+
+@{
+    ViewData["Title"] = "Admin User Management";
+}
+
+<style>
+	/* Page */
+	body {
+		background: #f5f3f0;
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	}
+
+	.admin-page {
+		max-width: 900px;
+		margin: 10px auto;
+		padding: 0 16px;
+	}
+
+	/* Header / logo */
+	.kv-header {
+		margin-top: -10px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 32px;
+	}
+
+	.kv-brand {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+
+	.kv-brand img {
+		height: 60px;
+		width: auto;
+	}
+
+	.kv-title {
+		font-size: 48px;
+		font-weight: 500;
+	}
+
+	.kv-home-btn {
+		width: 40px;
+		height: 40px;
+		border-radius: 999px;
+		border: 1px solid #ddd;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #fff;
+		color: #333;
+		text-decoration: none;
+	}
+
+	.kv-home-btn:hover {
+		background: #f5f5f5;
+	}
+
+	/* Page heading */
+	.admin-heading {
+		font-size: 26px;
+		font-weight: 600;
+		margin-bottom: 4px;
+	}
+
+	.admin-subtitle {
+		color: #555;
+		margin-bottom: 20px;
+	}
+
+	/* Create button */
+	.btn-create {
+		background: #007047;
+		color: #fff;
+		border-radius: 8px;
+		padding: 10px 24px;
+		border: none;
+		font-weight: 500;
+		cursor: pointer;
+		display: inline-block;
+		text-decoration: none;
+	}
+
+	.btn-create:hover {
+		filter: brightness(1.05);
+	}
+
+	/* User cards list */
+	.users-header-row {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 16px;
+	}
+
+	.user-card {
+		background: #ffffff;
+		border-radius: 12px;
+		padding: 16px 18px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 12px;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	}
+
+	.user-main {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+
+	.user-avatar {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		background: #e8e8e8;
+	}
+
+	.user-text strong {
+		display: block;
+		margin-bottom: 2px;
+	}
+
+	.user-meta {
+		font-size: 14px;
+		color: #555;
+	}
+
+	.user-meta span {
+		display: block;
+	}
+
+	.btn-edit {
+		background: #007047;
+		color: #fff;
+		border-radius: 8px;
+		padding: 8px 18px;
+		border: none;
+		cursor: pointer;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.btn-edit:hover {
+		filter: brightness(1.05);
+	}
+</style>
+
+<div class="admin-page">
+	<!-- Header with logo and home -->
+	<div class="kv-header">
+		<div class="kv-brand">
+			<img src="~/images/KartverketLogo.svg" alt="Kartverket" />
+			<span class="kv-title">Kartverket</span>
+		</div>
+
+		<a asp-controller="Home" asp-action="Index" class="kv-home-btn" aria-label="Gå til forsiden">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+				<polyline points="9 22 9 12 15 12 15 22" />
+			</svg>
+		</a>
+	</div>
+
+	<!-- Title -->
+	<h1 class="admin-heading">User Management</h1>
+	<p class="admin-subtitle">Manage users, roles and access</p>
+
+	<!-- Create new user -->
+	<div class="users-header-row">
+		<a asp-action="Create" class="btn-create">Create new user</a>
+	</div>
+
+	<!-- Users list -->
+	@if (Model != null && Model.Any())
+	{
+		foreach (var user in Model)
+		{
+			<div class="user-card">
+				<div class="user-main">
+					<div class="user-avatar" aria-hidden="true"></div>
+
+					<div class="user-text">
+						<strong>@user.Name</strong>
+
+						<div class="user-meta">
+							<span>Username: @user.UserName</span>
+							<span>Role: @user.Role</span>
+						</div>
+					</div>
+				</div>
+
+				<a asp-action="Edit" asp-route-id="@user.Id" class="btn-edit">Edit</a>
+			</div>
+		}
+	}
+	else
+	{
+		<p style="color: #555; text-align: center; margin-top: 40px;">No users found.</p>
+	}
+</div>
