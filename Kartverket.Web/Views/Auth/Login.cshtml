@@ -2,20 +2,55 @@
 @{
     ViewData["Title"] = "Login";
 }
-<section class="mx-auto max-w-4xl">
-    <div class="bg-gray-300 rounded-3xl p-8 shadow-lg">
-        <header class="mb-6">
-            <h1 class="text-2xl font-semibold text-center">Log inn form</h1>
-        </header>
+
+<section class="mx-auto max-w-sm pt-10">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+        <img src="~/images/KartverketLogo.svg"
+             alt="Kartverket"
+             class="h-20 w-auto" />
+    </div>
+
+    <!-- Title -->
+    <h1 class="text-4xl font-medium text-center text-gray-900 mb-8">
+        Sign In
+    </h1>
+
+    <!-- Form box -->
+    <div class="bg-white shadow-md rounded-2xl p-8 border border-gray-200">
+
         <form asp-action="LogIn" method="post" class="space-y-5">
-            <div class="grid gap-5 sm:grid-cols-2">
-                <!-- Log in Bruker -->
-                <div class="sm:col-span-2">
-                    <label asp-for="Username" class="block text-sm font-medium text-gray-800 mb-1">Username</label>
-                    <input asp-for="Username"
-                           class="block w-full rounded-lg border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 px-3 py-2"
-                           placeholder="e.g., Roar Roarsen" />
-                    <span asp-validation-for="Username" class="text-sm text-red-600"></span>
+
+            <!-- Username -->
+            <div>
+                <label asp-for="Username" class="block text-sm font-medium text-gray-800 mb-1">
+                    Username
+                </label>
+
+                <input asp-for="Username"
+                       class="block w-full border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
+                       placeholder="Username" />
+
+                <span asp-validation-for="Username" class="text-sm text-red-600"></span>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label asp-for="Password" class="block text-sm font-medium text-gray-800 mb-1">
+                    Password
+                </label>
+
+                <div class="relative">
+                    <input asp-for="Password" type="password"
+                           class="block w-full border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-800"
+                           placeholder="Password" />
+
+                    <!-- dekorativt øye-ikon -->
+                    <span class="absolute right-3 top-2.5 text-gray-500">
+                        👁️
+                    </span>
+                </div>
 
                 <span asp-validation-for="Password" class="text-sm text-red-600"></span>
             </div>
