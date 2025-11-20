@@ -2,7 +2,8 @@
 
 namespace Kartverket.Web.Models
 {
-    public class UserAdminViewModel
+    // Renamed to avoid duplicate type definitions.
+    public class UserListViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
