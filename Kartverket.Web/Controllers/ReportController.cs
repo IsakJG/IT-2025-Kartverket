@@ -15,7 +15,7 @@ public class ReportController : Controller
         _context = context;
     }
     // NY: Active Reports fra database (denne beholdes som han lagde den)
-    public async Task<IActionResult> ActiveReports() 
+   /* public async Task<IActionResult> ActiveReports() 
     {
         var activeReports = await _context.Reports
             .Include(r => r.User)
@@ -26,6 +26,63 @@ public class ReportController : Controller
 
         return View(activeReports);
     }
+    */
+    public async Task<IActionResult> ActiveReports()
+{
+    var reports = await _context.Reports
+        .Include(r => r.User)
+        .Include(r => r.Status)
+    
+        .Include(r => r.TimestampEntry)
+        .Where(r => r.StatusId == 1)   // 1 = Pending
+        .OrderBy(r => r.ReportId)
+        .ToListAsync();
+
+    var rows = reports.Select(r =>
+    {
+        double? lat = null;
+        double? lng = null;
+
+        // Prøv å lese GeoLocation som JSON: { "lat": ..., "lng": ... }
+        if (!string.IsNullOrWhiteSpace(r.GeoLocation))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(r.GeoLocation);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("lat", out var latProp))
+                    lat = latProp.GetDouble();
+
+                if (root.TryGetProperty("lng", out var lngProp))
+                    lng = lngProp.GetDouble();
+            }
+            catch
+            {
+                // ignorer feil JSON
+            }
+        }
+
+        string posText;
+        if (lat.HasValue && lng.HasValue)
+            posText = $"{lat.Value:F5}, {lng.Value:F5}";
+        else
+            posText = r.GeoLocation ?? "-";
+
+        return new ActiveReportRow
+        {
+            ReportId  = r.ReportId,
+            CreatedBy = r.User?.Username ?? "",
+            Status    = r.Status?.StatusName ?? "",
+            CreatedAt = r.TimestampEntry?.DateCreated,
+            Height    = $"{r.HeightInFeet} ft",
+            Position  = posText
+        };
+    }).ToList();
+
+    return View(rows);   // 👈 nå er modellen List<ActiveReportRow>
+}
+
     //Archive view
     public async Task<IActionResult> Archive()
     {
