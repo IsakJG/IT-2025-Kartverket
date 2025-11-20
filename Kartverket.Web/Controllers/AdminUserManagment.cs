@@ -1,4 +1,5 @@
-﻿using Kartverket.Web.Data;
+﻿
+using Kartverket.Web.Data;
 using Kartverket.Web.Models;
 using Kartverket.Web.Models.Entities;
 using Kartverket.Web.Services;

@@ -128,7 +128,7 @@ namespace Kartverket.Web.Controllers
 
                         // Redirect basert på roller
                         if (roles.Contains("Admin"))
-                            return RedirectToAction("Index", "AdminPart");
+                            return RedirectToAction("AdminPart", "User-mangement");
                         else if (roles.Contains("Registrar") || roles.Contains("Registar")) 
                             return RedirectToAction("RegisterMetode", "Registrar");
                         else
