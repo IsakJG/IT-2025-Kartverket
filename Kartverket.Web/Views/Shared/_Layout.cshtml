@@ -72,50 +72,61 @@
     @Html.AntiForgeryToken()
 
     <!-- Header / Nav -->
-    <header class="border-b bg-white">
-        <nav class="container flex items-center justify-between py-3">
-            <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
-               asp-area="" asp-controller="Home" asp-action="MainPage">
-                Kartverket.Web
-            </a>
+    @{
+        var isLoggedIn = Context.Session.GetInt32("UserId").HasValue;
+        var userRoles = Context.Session.GetString("UserRoles")?.Split(',') ?? Array.Empty<string>();
+        var username = Context.Session.GetString("Username") ?? "";
+    }
+    @if (isLoggedIn)
+    {
+        <header class="border-b bg-white">
+            <nav class="container flex items-center justify-between py-3">
+                <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                   asp-area="" asp-controller="Home" asp-action="MainPage">
+                    Kartverket.Web
+                </a>
 
-            <!-- Mobile menu button -->
-            <button id="navToggle"
-                    class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 hover:bg-gray-100 md:hidden"
-                    aria-controls="primaryNav"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
+                <!-- Mobile menu button -->
+                <button id="navToggle"
+                        class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 hover:bg-gray-100 md:hidden"
+                        aria-controls="primaryNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
 
-            <!-- Links -->
-            <div id="primaryNav"
-                 class="hidden w-full md:w-auto md:flex md:items-center md:gap-6">
-                <ul class="mt-3 flex flex-col gap-2 md:mt-0 md:flex-row md:items-center">
-                    <li>
-                        @{
-                            var isLoggedIn = Context.Session.GetInt32("UserId").HasValue;
-                            var userRoles = Context.Session.GetString("UserRoles")?.Split(',') ?? Array.Empty<string>();
-                            var username = Context.Session.GetString("Username") ?? "";
-                        }
-                        @if (isLoggedIn)
-                        {
-                            @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                <!-- Links -->
+                <div id="primaryNav"
+                     class="hidden w-full md:w-auto md:flex md:items-center md:gap-6">
+                    <ul class="mt-3 flex flex-col gap-2 md:mt-0 md:flex-row md:items-center">
+                        <li>
+                       
+                            @if (isLoggedIn)
                             {
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Registrar" asp-action="RegisterMetode">
-                                    Home
-                                </a>
-                            }
-                            else if (userRoles.Contains("Admin"))
-                            {
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Admin" asp-action="Index">
-                                    Home
-                                </a>
+                                @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                                {
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Registrar" asp-action="RegisterMetode">
+                                        Home
+                                    </a>
+                                }
+                                else if (userRoles.Contains("Admin"))
+                                {
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Admin" asp-action="Index">
+                                        Home
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Home" asp-action="MainPage">
+                                        Home
+                                    </a>
+                                }
                             }
                             else
                             {
@@ -124,93 +135,82 @@
                                     Home
                                 </a>
                             }
+                        </li>
+
+                    
+                        <!-- Dynamiske lenker basert på innlogging og roller -->
+                        @if (isLoggedIn)
+                        {
+                            <!-- Logged in user menu -->
+                            <li>
+                                <span class="block rounded-md px-3 py-2 text-gray-700 font-medium">
+                                    Hei, @username
+                                </span>
+                            </li>
+                        
+                            <!-- Admin lenker -->
+                            @if (userRoles.Contains("Admin"))
+                            {
+                                <li>
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+                                </li>
+                            }
+                        
+                            <!-- Registrar lenker -->
+                            @if (userRoles.Contains("Registrar"))
+                            {
+                                <li>
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Registrar" asp-action="RegisterMetode">Registrar Dashboard</a>
+                                </li>
+                                <li>
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Report" asp-action="ActiveReports">Review Reports</a>
+                                </li>
+                            }
+                        
+                            <!-- Pilot lenker -->
+                            @if (userRoles.Contains("Pilot"))
+                            {
+                                <li>
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Obstacle" asp-action="DataForm">Report Obstacle</a>
+                                </li>
+                                <li>
+                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                       asp-controller="Report" asp-action="Archive">View Archive</a>
+                                </li>
+                            }
+                        
+                            <!-- Logout for alle innloggede -->
+                            <li>
+                                <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" 
+                                            class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700 text-left w-full">
+                                        Logg Ut
+                                    </button>
+                                </form>
+                            </li>
                         }
                         else
                         {
-                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                               asp-controller="Home" asp-action="MainPage">
-                                Home
-                            </a>
-                        }
-                    </li>
-
-                    <li>
-                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                           asp-area="" asp-controller="AdminPart" asp-action="index">Admin</a>
-                    </li>
-                    
-                    <!-- Dynamiske lenker basert på innlogging og roller -->
-                    @if (isLoggedIn)
-                    {
-                        <!-- Logged in user menu -->
-                        <li>
-                            <span class="block rounded-md px-3 py-2 text-gray-700 font-medium">
-                                Hei, @username
-                            </span>
-                        </li>
-                        
-                        <!-- Admin lenker -->
-                        @if (userRoles.Contains("Admin"))
-                        {
+                            <!-- Not logged in menu -->
                             <li>
                                 <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+                                   asp-controller="Auth" asp-action="Login">Logg Inn</a>
+                            </li>
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Auth" asp-action="Register">Registrer</a>
                             </li>
                         }
-                        
-                        <!-- Registrar lenker -->
-                        @if (userRoles.Contains("Registrar"))
-                        {
-                            <li>
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Registrar" asp-action="RegisterMetode">Registrar Dashboard</a>
-                            </li>
-                            <li>
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Report" asp-action="ActiveReports">Review Reports</a>
-                            </li>
-                        }
-                        
-                        <!-- Pilot lenker -->
-                        @if (userRoles.Contains("Pilot"))
-                        {
-                            <li>
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Obstacle" asp-action="DataForm">Report Obstacle</a>
-                            </li>
-                            <li>
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Report" asp-action="Archive">View Archive</a>
-                            </li>
-                        }
-                        
-                        <!-- Logout for alle innloggede -->
-                        <li>
-                            <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" 
-                                        class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700 text-left w-full">
-                                    Logg Ut
-                                </button>
-                            </form>
-                        </li>
-                    }
-                    else
-                    {
-                        <!-- Not logged in menu -->
-                        <li>
-                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                               asp-controller="Auth" asp-action="Login">Logg Inn</a>
-                        </li>
-                        <li>
-                            <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                               asp-controller="Auth" asp-action="Register">Registrer</a>
-                        </li>
-                    }
-                </ul>
-            </div>
-        </nav>
-    </header>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+     }
 
     <!-- Success/Error Messages -->
     @if (TempData["SuccessMessage"] != null)
