@@ -12,6 +12,12 @@ var cultureInfo = new CultureInfo("en-US");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
+// Remove Kestrel server header for security
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.AddServerHeader = false;
+});
+
 builder.AddServiceDefaults();
 
 var connectionString =
@@ -206,7 +212,7 @@ using (var scope = app.Services.CreateScope())
     {
         var geoJson = JsonSerializer.Serialize(new
         {
-            lat =  7.955571,
+            lat = 7.955571,
             lng = 58.112380
         });
 
