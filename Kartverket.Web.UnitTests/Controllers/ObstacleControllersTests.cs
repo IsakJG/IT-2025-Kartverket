@@ -31,7 +31,7 @@ public class ObstacleControllersTests
     }
 
     [Fact]
-    public async Task DataFormReturnOverview_WithModel()//Tester at brukeren blir snedt til "Overview" etter innsending av skjema, at data vises korrekt og at ingen data går taåt underveis.
+    public async Task DataFormReturnOverview_WithModel()//Tester at brukeren blir sendt til "Overview" etter innsending av skjema, at data vises korrekt og at ingen data går taåt underveis.
     {
         var obstacledata = new ObstacleData
         {
