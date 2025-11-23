@@ -52,7 +52,7 @@ namespace Kartverket.Web.Controllers
                     var nextUserId = maxUserId + 1;
 
                     // Lag ny bruker med hashet passord
-                    var user = new User
+                    var user = new Kartverket.Web.Models.Entities.User
                     {
                         UserId = nextUserId,
                         Username = model.Username,
@@ -128,7 +128,7 @@ namespace Kartverket.Web.Controllers
 
                         // Redirect basert på roller
                         if (roles.Contains("Admin"))
-                            return RedirectToAction("AdminPart", "User-mangement");
+                            return RedirectToAction("Index", "AdminPart"); // Endret fra AdminPart, User-mangement, til Index, AdminPart
                         else if (roles.Contains("Registrar") || roles.Contains("Registar")) 
                             return RedirectToAction("RegisterMetode", "Registrar");
                         else

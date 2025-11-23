@@ -59,7 +59,7 @@ public class AdminPartController : Controller
             return View("CreateNewUser", model);
         }
 
-        var user = new User
+        var user = new Kartverket.Web.Models.Entities.User // Endret fra new User til new Kartverket.etc...
         {
             Username = model.UserName,
             Email = model.Email,

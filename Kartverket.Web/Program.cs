@@ -107,7 +107,7 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
     
     // Permissions Policy
-    context.Response.Headers.Append("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+    context.Response.Headers.Append("Permissions-Policy", "geolocation=(self), microphone=(), camera=()"); //Fikser posisjons bug med geolocation=(self) uten å fjerne sikkerhetstiltaket.
     
     await next();
 });
