@@ -4,6 +4,7 @@ using Kartverket.Web.Models;
 using System.Text.Json;
 using Kartverket.Web.Data;
 using Kartverket.Web.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kartverket.Web.Controllers;
 
@@ -45,6 +46,7 @@ public class ObstacleController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DataForm(ObstacleData obstacledata)
     {
+        int? userId = HttpContext.Session.GetInt32("UserId");
         if (!ModelState.IsValid)
         {
             return View(obstacledata);
@@ -71,7 +73,7 @@ public class ObstacleController : Controller
             //Setter standardverdier for nå - kan ednres senere der det kommer fra den piloten som er logget inn
             StatusId = 1,      // 1 = Pending (fra seed)
             CategoryId = 1,    // 1 = "Obstacle" (fra seed)
-            UserId = 3,        // midlertidig: piloten fra seed-data
+            UserId = userId,        // Henter fra session
             TimestampEntry = ts
         };
         _context.Reports.Add(report);
