@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  kartverketweb:
+    image: kartverketweb
+    build:
+      context: .
+      dockerfile: Kartverket.Web/Dockerfile
+    ports:
+      - "5028:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=server=mariadb;port=3306;database=kartverketdb;user=kartverket_user;password=KartverketBruker1234
+    networks:
+      - appnet
+
+
+networks:
+  appnet:
+    external: true
+

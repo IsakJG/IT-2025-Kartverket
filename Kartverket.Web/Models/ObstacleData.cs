@@ -7,14 +7,14 @@ public class ObstacleData
     public string ObstacleName { get; set; }
 
     [Required(ErrorMessage = "Field is required")]
-    [Range(0, 200)]
+    [Range(0, 20000000)]// sette  max verdi til noe fornuftig
     public double ObstacleHeight { get; set; }
 
     [MaxLength(1000)]
     public string ObstacleDescription { get; set; }
     
-    //La til lat og long for kartintegrasjon
-    public double Latitude { get; set; }
+   
+     public double Latitude { get; set; }
     public double Longitude { get; set; }
 
     public bool IsDraft { get; set; }

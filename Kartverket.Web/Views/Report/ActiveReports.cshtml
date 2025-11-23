@@ -1,0 +1,188 @@
+﻿@model IEnumerable<Kartverket.Web.Models.ActiveReportRow>
+@{
+    ViewData["Title"] = "Active Reports";
+}
+<h1 class="text-2xl font-semibold mb-4">@ViewData["Title"]</h1>
+
+<!-- Success Message -->
+@if (TempData["Message"] != null)
+{
+    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+        @TempData["Message"]
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-gray-600">No pending reports.</p>
+}
+else
+{
+    <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+        <table class="min-w-full table-auto divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Report ID</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Height</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Created by</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+                @foreach (var row in Model)
+                {
+                    <tr class="odd:bg-white even:bg-gray-100 hover:bg-gray-200">
+                        <td class="px-4 py-3 text-sm text-blue-600 font-semibold">
+                            @row.ReportId
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                            @row.Status
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @row.Height
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">
+                            @row.CreatedBy
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                            @row.CreatedAt?.ToString("yyyy-MM-dd HH:mm")
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right">
+                            <a asp-action="ValidateReport"
+                               asp-controller="Report"
+                               asp-route-reportId="@row.ReportId"
+                               class="inline-flex items-center rounded-md bg-gray-800 text-white px-3 py-1 text-xs font-medium hover:bg-gray-700">
+                                Open
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const container = document.querySelector('.overflow-x-auto');
+            const table = container?.querySelector('table');
+            if (!table) return;
+
+            const thead = table.tHead;
+            const tbody = table.tBodies[0];
+            if (!thead || !tbody) return;
+
+            const headerCells = Array.from(thead.rows[0].cells);
+            const lastCol = headerCells.length - 1; // assume last column = Actions (non-sortable)
+
+            // attach indicators and data-sortable to appropriate headers
+            headerCells.forEach((th, i) => {
+                // skip actions column
+                if (i === lastCol) return;
+                th.dataset.sortable = 'true';
+                th.style.cursor = 'pointer';
+                if (!th.querySelector('.sort-indicator')) {
+                    const span = document.createElement('span');
+                    span.className = 'sort-indicator ml-1';
+                    th.appendChild(span);
+                }
+            });
+
+            const getCellValue = (row, idx) => {
+                const cell = row.cells[idx];
+                if (!cell) return '';
+                const ds = cell.getAttribute('data-sort-value');
+                return (ds !== null ? ds : cell.innerText).trim();
+            };
+
+            const normalize = (val) => {
+                if (!val) return { t: 's', v: '' };
+
+                // coordinates "lat, lon"
+                if (/^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(val)) {
+                    const parts = val.split(',').map(s => parseFloat(s.trim()));
+                    return { t: 'coord', v: parts };
+                }
+
+                // ISO-like date YYYY-MM-DD[ T]HH:mm(:ss)?
+                const dm = val.match(/^\s*(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?\s*$/);
+                if (dm) {
+                    const y = +dm[1], mo = (+dm[2]) - 1, d = +dm[3];
+                    const h = dm[4] ? +dm[4] : 0, mi = dm[5] ? +dm[5] : 0, s = dm[6] ? +dm[6] : 0;
+                    return { t: 'd', v: Date.UTC(y, mo, d, h, mi, s) };
+                }
+                // fallback Date.parse (try replace space with T)
+                const fIso = Date.parse(val.replace(' ', 'T'));
+                if (!isNaN(fIso)) return { t: 'd', v: fIso };
+
+                // numeric / heights (e.g. "12.3", "12,3", "12 m")
+                const numMatch = val.trim().match(/^[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?\d+)?/);
+                if (numMatch) {
+                    const n = parseFloat(val.replace(',', '.').replace(/[^\d\.\-eE]/g, ''));
+                    if (!isNaN(n)) return { t: 'n', v: n };
+                }
+
+                return { t: 's', v: val.toLowerCase() };
+            };
+
+            const clearIndicators = () => {
+                headerCells.forEach(th => {
+                    const ind = th.querySelector('.sort-indicator');
+                    if (ind) ind.textContent = '';
+                    th.removeAttribute('aria-sort');
+                    delete th.dataset.order;
+                });
+            };
+
+            headerCells.forEach((th, colIndex) => {
+                if (th.dataset.sortable !== 'true') return;
+
+                th.addEventListener('click', () => {
+                    const current = th.dataset.order === 'asc' ? 'asc' : th.dataset.order === 'desc' ? 'desc' : null;
+                    const order = current === 'asc' ? 'desc' : 'asc';
+                    const rows = Array.from(tbody.rows).map((r, idx) => ({ r, idx }));
+
+                    rows.sort((A, B) => {
+                        const a = getCellValue(A.r, colIndex);
+                        const b = getCellValue(B.r, colIndex);
+                        const na = normalize(a);
+                        const nb = normalize(b);
+                        const dir = order === 'asc' ? 1 : -1;
+
+                        if (na.t === 'coord' && nb.t === 'coord') {
+                            if (na.v[0] !== nb.v[0]) return (na.v[0] - nb.v[0]) * dir;
+                            return (na.v[1] - nb.v[1]) * dir;
+                        }
+                        if (na.t === 'n' && nb.t === 'n') return (na.v - nb.v) * dir;
+                        if (na.t === 'd' && nb.t === 'd') return (na.v - nb.v) * dir;
+
+                        if (na.t !== nb.t) {
+                            const rank = { 'n': 1, 'd': 1, 'coord': 1, 's': 2 };
+                            return (rank[na.t] - rank[nb.t]) * dir;
+                        }
+
+                        // locale-aware string compare (numeric option helps "file2" vs "file10")
+                        const cmp = na.v.localeCompare(nb.v, undefined, { numeric: true });
+                        if (cmp !== 0) return cmp * dir;
+
+                        // stable fallback: original index
+                        return (A.idx - B.idx);
+                    });
+
+                    // re-append rows in new order
+                    rows.forEach(o => tbody.appendChild(o.r));
+
+                    // update indicators
+                    clearIndicators();
+                    th.dataset.order = order;
+                    th.setAttribute('aria-sort', order === 'asc' ? 'ascending' : 'descending');
+                    const indicator = th.querySelector('.sort-indicator');
+                    if (indicator) indicator.textContent = order === 'asc' ? '▲' : '▼';
+                });
+            });
+        })();
+    </script>
+}

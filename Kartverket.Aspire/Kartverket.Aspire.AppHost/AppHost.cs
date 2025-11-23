@@ -1,30 +1,34 @@
+using Kartverket.Aspire.AppHost.MariaDb;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 
-var mysql = builder.AddMySql("mysql")
-                   .WithDataBindMount(source: @"../../../MySql/Data") // Changed to relative path
-                   .WithLifetime(ContainerLifetime.Persistent);
+var mariaDbServer = builder.AddMariaDb("mariadb")
+                   .WithEnvironment("MYSQL_ROOT_PASSWORD", "kart")
+                   .WithEnvironment("MYSQL_USER", "kartverket_user")
+                   .WithEnvironment("MYSQL_PASSWORD", "KartverketBruker1234")
+                   .WithEnvironment("MYSQL_DATABASE", "kartverketdb")
+                   .WithLifetime(ContainerLifetime.Session)
+                   // ‚ùó 1. Legg til persistent volume (super viktig)
+                     .WithVolume("mariadb_data", "/var/lib/mysql")
+
+                    // ‚ùó 2. Endre Lifetime slik at containeren ikke slettes p√• stopp
+                    .WithLifetime(ContainerLifetime.Persistent);
 
 
-var mysqldb = mysql.AddDatabase("mysqldb");
 
-//Bruk enten dockerfile varianten eller native, ikke begge 
+
+
+var mariaDb = mariaDbServer.AddDatabase("kartverketdb");
+
 
 //Variant dockerfile
 builder.AddDockerfile("kartverket-web", "../../", "Kartverket.Web/Dockerfile")
                        .WithExternalHttpEndpoints()
-                       .WithReference(mysqldb)
-                       .WaitFor(mysqldb)
+                       .WithReference(mariaDb)
+                       .WaitFor(mariaDb)
+                        .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
                        .WithHttpEndpoint(port: 8080, targetPort: 8080, name: "kartverket-web");
-
-
-//Det tar en time Â gÂ ned til ÿrsta rÂdhus!
-
-//Variant native 
-/*builder.AddProject<Projects.Kartverket_Web>("kartverket-web")
-                       .WithReference(mysqldb)                      
-                       .WaitFor(mysqldb); 
-*/
+                        
 
 builder.Build().Run();

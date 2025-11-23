@@ -7,8 +7,8 @@
     <div class="bg-gray-300 rounded-3xl p-8 shadow-lg">
         <header class="mb-6">
             <h1 class="text-2xl font-semibold text-center">Obstacle Registration Form</h1>
-        </header> <form asp-action="DataForm" method="post" class="space-y-5">
-
+        </header> <form asp-controller ="Obstacle" asp-action="DataForm" method="post" class="space-y-5">
+                                    @Html.AntiForgeryToken() <!-- Sikrer mot CSRF-angrep -->
         <div class="grid gap-5 sm:grid-cols-2">
             <!-- Obstacle Name -->
             <div class="sm:col-span-2">
@@ -46,13 +46,33 @@
             <div class="mt-6">
                 <label class="block text-base font-medium text-gray-900 mb-2">Select Obstacle Location</label>
                 <p class="text-sm text-gray-600 mb-1">Click on the map to select the obstacle location</p>
-                <div id="map" style="height: 300px;" class="mb-4 border rounded shadow"></div>
+
+                <div class="flex gap-4 items-start mb-4">
+                  <!-- Kart (venstre) -->
+                <div id="map" style="height:300px; width:78%;" class="border rounded shadow"></div>
+
+                <!-- Pilot-vennlig toolbar (høyre) -->
+                <div class="flex flex-col gap-3" style="width:22%;">
+                    <button type="button" id="drawPointBtn"
+                            class="w-full py-4 rounded-xl text-white font-semibold text-lg"
+                            style="background:#2563eb;">📍 Point</button>
+                    <button type="button" id="drawLineBtn"
+                            class="w-full py-4 rounded-xl text-white font-semibold text-lg"
+                            style="background:#16a34a;">📏 Line</button>
+                    <button type="button" id="clearDrawBtn"
+                            class="w-full py-4 rounded-xl text-white font-semibold text-lg"
+                            style="background:#6b7280;">🧹 Clear</button>
+                  </div>
+                </div>
 
                 <!-- Skjulte felter for koordinater -->
                 <input type="hidden" asp-for="Latitude" id="Latitude" />
                 <input type="hidden" asp-for="Longitude" id="Longitude" />
                 <span asp-validation-for="Latitude" class="text-sm text-red-600"></span>
                 <span asp-validation-for="Longitude" class="text-sm text-red-600"></span>
+
+                <!-- Skjult felt for GeoJSON (punkt/linje) -->
+                <input type="hidden" id="GeometryGeoJson" name="GeometryGeoJson" />
 
                 <!-- Vis valgt posisjon -->
                 <div id="selectedLocation" class="text-sm text-gray-700 mt-2 hidden">
@@ -65,7 +85,7 @@
                         class="inline-flex items-center justify-center rounded-lg bg-gray-400 px-4 py-2 text-black hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400">
                     Submit Data
                 </button>
-                <a asp-controller="Home" asp-action="Index"
+                <a asp-controller="Home" asp-action="MainPage"
                    class="inline-flex items-center rounded-lg bg-gray-400 px-4 py-2 text-black ring-1 ring-gray-300 hover:bg-gray-400">
                     Back to Home
                 </a>
@@ -74,10 +94,24 @@
     </div>
 </section>
 
+<style>
+  /* større berøringsflater for nettbrett/hansker */
+  .leaflet-touch .leaflet-bar a {
+    width: 56px; height: 56px; line-height: 56px; font-size: 18px;
+  }
+  /* litt luft fra kanter */
+  .leaflet-left .leaflet-control { margin-left: 14px; }
+  .leaflet-top  .leaflet-control { margin-top: 14px; }
+</style>
+
 @section Scripts {
     <!-- Include Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Leaflet.Draw (for marker + polyline) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     
     <script>
         // Initialiserer kartet uten å sette en standard posisjon
@@ -85,6 +119,9 @@
         var map = L.map('map');
         var marker; // Variabel for å holde på markøren
         var userLocationCircle; // Variabel for nøyaktighetssirkelen
+        var hasCentered = false; // Hindrer gjentatt re-sentrering
+        var activeDrawer = null; // referanse til aktivt tegneverktøy
+        var isDrawing   = false; // om vi er i tegne-modus
 
         // Legger til OpenStreetMap som bakgrunnskart
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -92,7 +129,87 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Funksjon som kjøres når brukerens posisjon er funnet
+         // ---- Leaflet.Draw: marker + linje ----
+
+        // Samler alt brukeren tegner
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+            // Skjul Leaflet.Draw-ikon-toolbar – vi styrer tegning via egne knapper
+            var drawControl = new L.Control.Draw({ draw: false, edit: false });
+
+            // Funksjon for å starte tegning fra knapp
+            function startDraw(type) {
+            // deaktiver forrige verktøy hvis noe sto på
+            if (activeDrawer) { activeDrawer.disable(); activeDrawer = null; }
+            isDrawing = true;
+
+            if (type === 'marker') {
+              activeDrawer = new L.Draw.Marker(map, drawControl.options.marker || {});
+            } else if (type === 'polyline') {
+            activeDrawer = new L.Draw.Polyline(map, drawControl.options.polyline || {});
+         }
+         activeDrawer.enable();
+        }
+
+    // Koble knappene til Leaflet.Draw
+    document.getElementById('drawPointBtn').addEventListener('click', function () {
+      startDraw('marker');
+    });
+    document.getElementById('drawLineBtn').addEventListener('click', function () {
+      startDraw('polyline');
+    });
+    document.getElementById('clearDrawBtn').addEventListener('click', function () {
+      drawnItems.clearLayers();
+      captureGeoJson();
+    });
+
+    // Hold tegnemodus oppdatert
+    map.on('draw:drawstart',  function(){ isDrawing = true;  });
+    map.on('draw:drawstop',   function(){ isDrawing = false; activeDrawer = null; });
+
+        // Når noe tegnes -> legg det til og oppdater skjulte felter
+        map.on(L.Draw.Event.CREATED, function (e) {
+            drawnItems.addLayer(e.layer);
+
+            // Oppdater eksisterende skjulte felter når bruker lager markør
+            if (e.layerType === 'marker') {
+            var p = e.layer.getLatLng();
+            document.getElementById('Latitude').value  = p.lat.toFixed(6);
+            document.getElementById('Longitude').value = p.lng.toFixed(6);
+            var latDisp = document.getElementById('latDisplay');
+            var lngDisp = document.getElementById('lngDisplay');
+            if (latDisp && lngDisp) { latDisp.textContent = p.lat.toFixed(6); lngDisp.textContent = p.lng.toFixed(6); }
+            }
+
+            // Hvis bruker lager linje, sett Lat/Lng til første punkt 
+            if (e.layerType === 'polyline') {
+            var pts = e.layer.getLatLngs();
+            if (pts.length > 0) {
+                document.getElementById('Latitude').value  = pts[0].lat.toFixed(6);
+                document.getElementById('Longitude').value = pts[0].lng.toFixed(6);
+                var latDisp = document.getElementById('latDisplay');
+                var lngDisp = document.getElementById('lngDisplay');
+                if (latDisp && lngDisp) { latDisp.textContent = pts[0].lat.toFixed(6); lngDisp.textContent = pts[0].lng.toFixed(6); }
+            }
+            }
+
+            captureGeoJson();
+        });
+
+        // Hold GeoJSON oppdatert når bruker redigerer/sletter
+        map.on('draw:edited',  captureGeoJson);
+        map.on('draw:deleted', captureGeoJson);
+
+        // Skriv hele tegne-laget til hidden-feltet
+        function captureGeoJson() {
+            var hidden = document.getElementById('GeometryGeoJson');
+            if (!hidden) return;
+            hidden.value = JSON.stringify(drawnItems.toGeoJSON());
+        }    
+        
+        
+    // Funksjon som kjøres når brukerens posisjon er funnet
         function onLocationFound(e) {
             // e.latlng inneholder latitude og longitude
             // e.accuracy inneholder nøyaktigheten i meter
@@ -100,7 +217,10 @@
 
             // Setter kartvisningen til brukerens posisjon med zoomnivå 13
             // Zoomnivå 13 er et godt nivå for å se detaljer i nærområdet
+            if (!hasCentered) {
             map.setView(e.latlng, 13);
+            hasCentered = true;
+           }
 
             // Fjerner eksisterende markør hvis den finnes
             if (marker) {
@@ -179,6 +299,7 @@
 
         // Event listener for når brukeren klikker på kartet for å velge en annen posisjon
         map.on('click', function (e) {
+            if (isDrawing) return; // ignorerer klikk mens tegneverktøy er aktivt
             // Fjerner eksisterende markør
             if (marker) {
                 map.removeLayer(marker);
@@ -196,6 +317,12 @@
             document.getElementById('Latitude').value = e.latlng.lat;
             document.getElementById('Longitude').value = e.latlng.lng;
 
+            // Sørger for at klikk-markøren blir med i GeoJSON
+            drawnItems.clearLayers();        // fjerner tidligere lag (valgfritt men ryddig)
+            drawnItems.addLayer(marker);     // legger markøren til i FeatureGroup
+            captureGeoJson();                // oppdaterer det skjulte feltet
+
+            
             // Oppdaterer visningen av koordinatene
             document.getElementById('latDisplay').textContent = e.latlng.lat.toFixed(6);
             document.getElementById('lngDisplay').textContent = e.latlng.lng.toFixed(6);
@@ -210,10 +337,77 @@
             if (!lat || !lng) {
                 e.preventDefault(); // Stoppe skjemaets innsending
                 alert('Vennligst velg en lokasjon på kartet før du sender inn skjemaet.');
+                return; // Stopp videre kjøring
             }
+
+        // ---- Oppdater GeoJSON rett før skjema sendes ----
+        if (typeof captureGeoJson === 'function') {
+          captureGeoJson();
+        }
         });
     </script>
 
     <!-- Client-side validation -->
-    <partial name="_ValidationScriptsPartial" />
+   @*  <partial name="_ValidationScriptsPartial" /> *@
+
+    <script>
+        // Change submit button text to "Submit Draft" when required fields are not filled.
+        (function () {
+            var $form = $('form');
+            var $submit = $form.find('button[type="submit"]').first();
+            var originalText = $submit.text().trim();
+
+            function hasJQueryValidate() {
+                return typeof $form.valid === 'function';
+            }
+
+            function isFormValid() {
+                if (hasJQueryValidate()) {
+                    // Use jQuery Validate (unobtrusive) if present
+                    return $form.valid();
+                }
+
+                // Fallback: simple check for empty elements that have data-val-required attribute
+                var valid = true;
+                $form.find('[data-val-required]').each(function () {
+                    var $el = $(this);
+                    var val = $el.val();
+                    if (!val || val.toString().trim() === '') {
+                        valid = false;
+                        return false; // break each
+                    }
+                });
+                return valid;
+            }
+
+            function updateSubmitText() {
+                try {
+                    if (isFormValid()) {
+                        $submit.text(originalText);
+                    } else {
+                        $submit.text('Submit Draft');
+                    }
+                } catch (ex) {
+                    // if something goes wrong, don't block submission — keep original text
+                    console.error('updateSubmitText error', ex);
+                    $submit.text(originalText);
+                }
+            }
+
+            $(function () {
+                // initial update after validation scripts executed
+                setTimeout(updateSubmitText, 50);
+
+                // update on input/change
+                $form.on('input change keyup', 'input, textarea, select', function () {
+                    updateSubmitText();
+                });
+
+                // ensure label updated just before submit (user may click when state changed)
+                $form.on('submit', function () {
+                    updateSubmitText();
+                });
+            });
+        })();
+    </script>
 }

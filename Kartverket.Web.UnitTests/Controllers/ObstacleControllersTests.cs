@@ -2,6 +2,9 @@ using Kartverket.Web.Controllers;
 using Kartverket.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
+using Microsoft.EntityFrameworkCore;
+using Kartverket.Web.Data;
+
 
 namespace Kartverket.Web.UnitTests.Controllers;
 
@@ -11,9 +14,14 @@ public class ObstacleControllersTests
 
     public ObstacleControllersTests()
     {
-        _controller = new ObstacleController();
-    }
+        var options = new DbContextOptionsBuilder<KartverketDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDb")
+            .Options;
 
+        var context = new KartverketDbContext(options);
+
+        _controller = new ObstacleController(context);
+    }
     [Fact]
     public void DataFormViewResult() //Tester at skjema-siden faktisk vises i nettleseren
     {
@@ -23,7 +31,7 @@ public class ObstacleControllersTests
     }
 
     [Fact]
-    public void DataFormReturnOverview_WithModel()//Tester at brukeren blir snedt til "Overview" etter innsending av skjema, at data vises korrekt og at ingen data går taåt underveis.
+    public async Task DataFormReturnOverview_WithModel()//Tester at brukeren blir sendt til "Overview" etter innsending av skjema, at data vises korrekt og at ingen data går taåt underveis.
     {
         var obstacledata = new ObstacleData
         {
@@ -38,10 +46,12 @@ public class ObstacleControllersTests
             Longitude = 73.141592
         };
 
-        var result = _controller.DataForm(obstacledata) as ViewResult;
+        var result = await _controller.DataForm(obstacledata);
 
+        // Konverter retur til ViewResult
+         var view = Assert.IsType<ViewResult>(result);
         Assert.NotNull(result);
-        Assert.Equal("Overview", result.ViewName);
-        Assert.Equal(obstacledata, result.Model);
+        Assert.Equal("Overview", view.ViewName);
+        Assert.Equal(obstacledata, view.Model);
     }
 }

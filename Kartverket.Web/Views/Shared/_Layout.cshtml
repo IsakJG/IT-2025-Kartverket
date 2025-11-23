@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Kartverket.Web</title>
 
+    <!-- CSRF Token for AJAX requests -->
+    @{
+        var antiforgery = Context.RequestServices.GetService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
+        var tokens = antiforgery?.GetAndStoreTokens(Context);
+    }
+    <meta name="csrf-token" content="@tokens?.RequestToken" />
+
     <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script> 
     <script>
         tailwind.config = {
           theme: {
@@ -15,6 +22,41 @@
             }
           }
         }
+
+        // CSRF token setup for AJAX requests
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : 
+                             (csrfTokenInput ? csrfTokenInput.value : '');
+            
+            if (!csrfToken) return;
+
+            // Set up jQuery AJAX to include CSRF token
+            if (typeof jQuery !== 'undefined') {
+                $.ajaxSetup({
+                    headers: {
+                        'RequestVerificationToken': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+            }
+
+            // Set up fetch to include CSRF token
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                const [url, options = {}] = args;
+                if (options.method && options.method.toLowerCase() !== 'get') {
+                    options.headers = {
+                        ...options.headers,
+                        'RequestVerificationToken': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                }
+                return originalFetch(url, options);
+            };
+        });
     </script>
 
     <!-- Leaflet -->
@@ -25,47 +67,148 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Kartverket.Web.styles.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900"> 
+    <!-- CSRF Token hidden field for form submissions -->
+    @Html.AntiForgeryToken()
+
     <!-- Header / Nav -->
-    <header class="border-b bg-white">
-        <nav class="container flex items-center justify-between py-3">
-            <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
-               asp-area="" asp-controller="Home" asp-action="Index">
-                Kartverket.Web
-            </a>
-
-            <!-- Mobile menu button -->
-            <button id="navToggle"
-                    class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 hover:bg-gray-100 md:hidden"
-                    aria-controls="primaryNav"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-
-            <!-- Links -->
-            <div id="primaryNav"
-                 class="hidden w-full md:w-auto md:flex md:items-center md:gap-6">
-                <ul class="mt-3 flex flex-col gap-2 md:mt-0 md:flex-row md:items-center">
-                    <li>
-                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                           asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li>
-                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                           asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
-
-                </ul>
+    @{
+        var isLoggedIn = Context.Session.GetInt32("UserId").HasValue;
+        var userRoles = Context.Session.GetString("UserRoles")?.Split(',') ?? Array.Empty<string>();
+        var username = Context.Session.GetString("Username") ?? "";
+    }
+    @if (isLoggedIn)
+    {
+        <header class="border-b bg-white">
+            <nav class="container flex items-center justify-between py-3">
+                @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                {
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                       asp-controller="Registrar" asp-action="RegisterMetode">
+                        Kartverket.Web
+                    </a>
+                }
+                else if (userRoles.Contains("Admin"))
+                {
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                       asp-controller="AdminPart" asp-action="Index">
+                        Kartverket.Web
+                    </a>
+                }
+                else
+                {
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                       asp-area="" asp-controller="Home" asp-action="MainPage">
+                        Kartverket.Web
+                    </a>
+                }
 
 
 
+
+
+                <!-- Mobile menu button -->
+                <button id="navToggle"
+                        class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 hover:bg-gray-100 md:hidden"
+                        aria-controls="primaryNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                <!-- Links -->
+                <div id="primaryNav"
+                     class="hidden w-full md:w-auto md:flex md:items-center md:gap-6">
+                    <ul class="mt-3 flex flex-col gap-2 md:mt-0 md:flex-row md:items-center">                    
+                        <!-- Dynamiske lenker basert på innlogging og roller -->
+                        @if (isLoggedIn)
+                        {
+                            <!-- Logged in user menu -->
+                            <li class="flex items-center gap-2">
+                                <span class="block rounded-md px-3 py-2 text-gray-700 font-medium">
+                                    Logged in as, @username
+                                </span>
+                            </li>
+
+                            <li>
+
+                                @if (isLoggedIn)
+                                {
+                                    @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                                    {
+                                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                           asp-controller="Registrar" asp-action="RegisterMetode">
+                                            Home
+                                        </a>
+                                    }
+                                    else if (userRoles.Contains("Admin"))
+                                    {
+                                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                           asp-controller="AdminPart" asp-action="Index">
+                                            Home
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                           asp-controller="Home" asp-action="MainPage">
+                                            Home
+                                        </a>
+                                    }
+                                }
+                            </li>
+
+                        
+                            <!-- Logout for alle innloggede -->
+                            <li>
+                                <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" 
+                                            class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700 text-left w-full">
+                                        Logg Ut
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Not logged in menu -->
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Auth" asp-action="Login">Logg Inn</a>
+                            </li>
+                            <li>
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                   asp-controller="Auth" asp-action="Register">Registrer</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </nav>
+        </header>
+     }
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="container mt-4">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                @TempData["SuccessMessage"]
             </div>
-        </nav>
-    </header>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="container mt-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                @TempData["ErrorMessage"]
+            </div>
+        </div>
+    }
 
     <!-- Main -->
     <div class="container flex-1 w-full">
@@ -85,6 +228,7 @@
         </div>
     </footer>
 
+
     <!-- Scripts -->
     <script>
         // Mobile nav toggle
@@ -97,9 +241,31 @@
             primaryNav.classList.toggle('hidden');
           });
         }
+
+        // Auto-add CSRF token to all forms
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form');
+            const csrfTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            
+            if (!csrfTokenInput) return;
+            
+            const csrfToken = csrfTokenInput.value;
+            
+            forms.forEach(form => {
+                // Skip if form already has CSRF token
+                if (!form.querySelector('input[name="__RequestVerificationToken"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = '__RequestVerificationToken';
+                    hiddenInput.value = csrfToken;
+                    form.appendChild(hiddenInput);
+                }
+            });
+        });
     </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

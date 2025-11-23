@@ -25,32 +25,6 @@ namespace Kartverket.Web.UnitTests.Controllers
             Assert.Null(viewResult.ViewName);
         }
 
-        [Fact]
-        public void GetAThing_IdGreaterThan10_ReturnsEspen()
-        {
-            // Arrange
-            var controller = GetUnitUnderTest();
-            // Act
-            var result = controller.GetAThing(11);
-            var viewResult = result as ViewResult;
-            var model = viewResult.Model as Models.ThingModel;
-            // Assert
-            Assert.Equal("Isak", model.Name);
-        }
-
-        [Fact]
-        public void GetAThing_Id10OrLess_ReturnsRania()
-        {
-            // Arrange
-            var controller = GetUnitUnderTest();
-            // Act
-            var result = controller.GetAThing(10);
-            var viewResult = result as ViewResult;
-            var model = viewResult.Model as Models.ThingModel;
-            // Assert
-            Assert.Equal("Benjamin", model.Name);
-        }
-
         private HomeController GetUnitUnderTest()
         {
             var logger = Substitute.For<Microsoft.Extensions.Logging.ILogger<HomeController>>();

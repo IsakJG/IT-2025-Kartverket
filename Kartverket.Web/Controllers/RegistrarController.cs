@@ -1,14 +1,14 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using Kartverket.Web.Models;
+using MySqlConnector;
 
-namespace Kartverket.Web.Controllers
+namespace Kartverket.Web.Controllers;
+
+public class RegistrarController : Controller
 {
-    [Authorize(Roles = "Registrar")]
-    public class RegistrarController : Controller//Håndterer autorisering av Registrar
+    public ActionResult RegisterMetode()
     {
-        public IActionResult MainPage()
-        {
-            return View();
-        }
+        return View("MainPageReg");
     }
 }
