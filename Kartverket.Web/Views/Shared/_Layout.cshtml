@@ -133,7 +133,7 @@
                                 else if (userRoles.Contains("Admin"))
                                 {
                                     <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                       asp-controller="Admin" asp-action="Index">
+                                       asp-controller="AdminPart" asp-action="Index">
                                         Home
                                     </a>
                                 }
@@ -157,23 +157,11 @@
                                     Hei, @username
                                 </span>
                             </li>
-                        
-                            <!-- Admin lenker -->
-                            @if (userRoles.Contains("Admin"))
-                            {
-                                <li>
-                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                       asp-controller="AdminPart" asp-action="Index">Admin Dashboard</a> 
-                                </li>
-                            }
+                      
                         
                             <!-- Registrar lenker -->
                             @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
                             {
-                                <li>
-                                    <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                       asp-controller="Registrar" asp-action="RegisterMetode">Registrar Dashboard</a>
-                                </li>
                                 <li>
                                     <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
                                        asp-controller="Report" asp-action="ActiveReports">Review Reports</a>
