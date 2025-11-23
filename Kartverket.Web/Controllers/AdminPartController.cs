@@ -49,14 +49,12 @@ public class AdminPartController : Controller
         if (!ModelState.IsValid)
         {
             ViewBag.Roles = new SelectList(_db.Roles, "RoleId", "RoleName");
-            return View("CreateNewUser", model);
         }
 
         if (!model.RoleId.HasValue)
         {
             ModelState.AddModelError(nameof(model.RoleId), "Please select a role.");
             ViewBag.Roles = new SelectList(_db.Roles, "RoleId", "RoleName");
-            return View("CreateNewUser", model);
         }
 
         var user = new Kartverket.Web.Models.Entities.User // Endret fra new User til new Kartverket.etc...
@@ -116,7 +114,6 @@ public class AdminPartController : Controller
         if (!ModelState.IsValid)
         {
             ViewBag.Roles = new SelectList(_db.Roles, "RoleId", "RoleName", model.RoleId);
-            return View("EditUser", model);
         }
 
         var user = _db.Users.FirstOrDefault(u => u.UserId == model.Id);
