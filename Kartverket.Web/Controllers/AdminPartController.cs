@@ -49,14 +49,12 @@ public class AdminPartController : Controller
         if (!ModelState.IsValid)
         {
             ViewBag.Roles = new SelectList(_db.Roles, "RoleId", "RoleName");
-            return View("CreateNewUser", model);
         }
 
         if (!model.RoleId.HasValue)
         {
             ModelState.AddModelError(nameof(model.RoleId), "Please select a role.");
             ViewBag.Roles = new SelectList(_db.Roles, "RoleId", "RoleName");
-            return View("CreateNewUser", model);
         }
 
         var user = new Kartverket.Web.Models.Entities.User // Endret fra new User til new Kartverket.etc...
@@ -116,7 +114,6 @@ public class AdminPartController : Controller
         if (!ModelState.IsValid)
         {
             ViewBag.Roles = new SelectList(_db.Roles, "RoleId", "RoleName", model.RoleId);
-            return View("EditUser", model);
         }
 
         var user = _db.Users.FirstOrDefault(u => u.UserId == model.Id);
@@ -154,5 +151,42 @@ public class AdminPartController : Controller
 
         TempData["SuccessMessage"] = "User updated successfully.";
         return RedirectToAction("Index", "AdminPart");
+    }
+
+    // DELETE USER - POST
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Delete(int id)
+    {
+        try
+        {
+            // Finn brukeren som skal slettes
+            var user = _db.Users.FirstOrDefault(u => u.UserId == id);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Slett brukerroller først (pga foreign key constraints)
+            var userRoles = _db.UserRoles.Where(ur => ur.UserId == id);
+            _db.UserRoles.RemoveRange(userRoles);
+
+            // Slett brukeren
+            _db.Users.Remove(user);
+            _db.SaveChanges();
+
+            TempData["SuccessMessage"] = $"User {user.Username} was successfully deleted.";
+        }
+        catch (DbUpdateException dbEx)
+        {
+            TempData["ErrorMessage"] = "Cannot delete user because they have related records in the system. Please reassign or delete their reports first.";
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "An error occurred while deleting the user.";
+        }
+
+        return RedirectToAction("Index");
     }
 }

@@ -60,7 +60,7 @@ namespace Kartverket.Web.UnitTests.Controllers
                 ReportId = 1,
                 Title = "Test",
                 HeightInFeet = 100,
-                User = new User { Username = "Pilot" },
+                User = new Models.Entities.User { Username = "Pilot" },
                 Status = new Status { StatusName = "Pending" },
                 Category = new Category { CategoryName = "Tower" },
                 TimestampEntry = new TimestampEntry { DateCreated = DateTime.UtcNow }
