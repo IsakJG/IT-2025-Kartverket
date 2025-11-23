@@ -25,17 +25,6 @@ public class HomeController : Controller
         return View(); 
     }
 
-    
-    public IActionResult GetAThing(int id) 
-    {
-        _logger.LogInformation("GetAThing called with id {Id}", id); 
-        if (id > 10)
-        {
-            return View(new ThingModel { Name = "Espen" }); 
-        }
-        return View(new ThingModel { Name = "Rania" }); 
-
-    }
 
     public IActionResult MainPage() 
     {
