@@ -117,6 +117,12 @@
 		display: block;
 	}
 
+	.user-actions {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+
 	.btn-edit {
 		background: #007047;
 		color: #fff;
@@ -130,6 +136,75 @@
 
 	.btn-edit:hover {
 		filter: brightness(1.05);
+	}
+
+	.btn-delete {
+		background: #dc2626;
+		color: #fff;
+		border-radius: 8px;
+		padding: 8px 18px;
+		border: none;
+		cursor: pointer;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.btn-delete:hover {
+		background: #b91c1c;
+	}
+
+	/* Modal styles */
+	.modal {
+		display: none;
+		position: fixed;
+		z-index: 1000;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0,0,0,0.5);
+	}
+
+	.modal-content {
+		background-color: #fefefe;
+		margin: 15% auto;
+		padding: 20px;
+		border-radius: 12px;
+		width: 400px;
+		box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+	}
+
+	.btn-cancel {
+		padding: 8px 16px;
+		border-radius: 8px;
+		border: 1px solid #ccc;
+		text-decoration: none;
+		color: #333;
+		background: #fff;
+		cursor: pointer;
+	}
+
+	.btn-cancel:hover {
+		background: #f5f5f5;
+	}
+
+	/* Success/Error messages */
+	.alert-success {
+		background: #d1fae5;
+		border: 1px solid #a7f3d0;
+		color: #065f46;
+		padding: 12px 16px;
+		border-radius: 8px;
+		margin-bottom: 16px;
+	}
+
+	.alert-error {
+		background: #fee2e2;
+		border: 1px solid #fecaca;
+		color: #991b1b;
+		padding: 12px 16px;
+		border-radius: 8px;
+		margin-bottom: 16px;
 	}
 </style>
 
@@ -145,6 +220,21 @@
 	<!-- Title -->
 	<h1 class="admin-heading">User Management</h1>
 	<p class="admin-subtitle">Manage users, roles and access</p>
+
+	<!-- Success/Error Messages -->
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<div class="alert-success">
+			@TempData["SuccessMessage"]
+		</div>
+	}
+	
+	@if (TempData["ErrorMessage"] != null)
+	{
+		<div class="alert-error">
+			@TempData["ErrorMessage"]
+		</div>
+	}
 
 	<!-- Create new user -->
 	<div class="users-header-row">
@@ -170,7 +260,12 @@
 					</div>
 				</div>
 
-				<a asp-action="Edit" asp-route-id="@user.Id" class="btn-edit">Edit</a>
+				<div class="user-actions">
+					<a asp-action="Edit" asp-route-id="@user.Id" class="btn-edit">Edit</a>
+					
+					<!-- Delete Button with Modal -->
+					<button type="button" onclick="confirmDelete(@user.Id, '@user.UserName')" class="btn-delete">Delete</button>
+				</div>
 			</div>
 		}
 	}
@@ -179,3 +274,49 @@
 		<p style="color: #555; text-align: center; margin-top: 40px;">No users found.</p>
 	}
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+	<div class="modal-content">
+		<h3 style="margin-bottom: 16px;">Confirm Deletion</h3>
+		<p style="margin-bottom: 20px;">Are you sure you want to delete user <strong id="userToDelete"></strong>? This action cannot be undone.</p>
+		<div style="display: flex; gap: 8px; justify-content: flex-end;">
+			<button type="button" onclick="closeModal()" class="btn-cancel">Cancel</button>
+			<form id="deleteForm" method="post" asp-action="Delete">
+				@Html.AntiForgeryToken()
+				<input type="hidden" name="id" id="deleteUserId" />
+				<button type="submit" class="btn-delete">Delete</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+    function confirmDelete(userId, userName) {
+        document.getElementById('userToDelete').textContent = userName;
+        document.getElementById('deleteUserId').value = userId;
+        document.getElementById('deleteModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('deleteModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // Auto-close success messages after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const successMessage = document.querySelector('.alert-success');
+        if (successMessage) {
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
