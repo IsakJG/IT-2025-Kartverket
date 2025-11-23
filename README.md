@@ -81,3 +81,23 @@ The project uses the following libraries that you may need to install:
     - Leaflet  
     - Leaflet.Draw  
     - Leaflet.Draw  
+
+## Unit Tests
+The project includes a dedicated test project (Kartverket.Web.UnitTests) used to verify the logic of all main controllers.
+
+# Test Status (all tests passing)
+
+- AuthControllerUnitTests ✅
+
+- ReportControllerUnitTests ✅
+
+- HomeControllerUnitTests ✅
+
+- ObstacleControllerUnitTests ✅
+
+- AdminPartControllerUnitTests ✅
+
+- RegistrarControllerUnitTests ✅
+
+# How to run the tests
+ - dotnet test
