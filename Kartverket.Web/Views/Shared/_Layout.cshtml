@@ -152,10 +152,24 @@
                         @if (isLoggedIn)
                         {
                             <!-- Logged in user menu -->
-                            <li>
+                            <li class="flex items-center gap-2">
                                 <span class="block rounded-md px-3 py-2 text-gray-700 font-medium">
                                     Hei, @username
                                 </span>
+
+                                <button type="button"
+                                        class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
+                                        data-home='@(
+                                            userRoles.Contains("Registrar") || userRoles.Contains("Registar")
+                                                ? Url.Action("RegisterMetode","Registrar")
+                                                : userRoles.Contains("Admin")
+                                                    ? Url.Action("Index","AdminPart")
+                                                    : Url.Action("MainPage","Home")
+                                        )'
+                                        onclick="window.location.href = this.getAttribute('data-home')"
+                                        aria-label="Return to home">
+                                    Return
+                                </button>
                             </li>
                       
                         
@@ -281,6 +295,25 @@
                 }
             });
         });
+
+        function safeBack(el) {
+            var home = el.getAttribute('data-home');
+            try {
+                var ref = document.referrer || '';
+                if (ref) {
+                    var refPath = new URL(ref, location.origin).pathname.toLowerCase();
+                    // don't go back to auth/login pages — add/adjust paths if needed
+                    if (refPath.startsWith('/auth') || refPath.startsWith('/account/login') || refPath.startsWith('/signin')) {
+                        window.location.href = home;
+                        return;
+                    }
+                }
+                if (history.length > 1) { history.back(); return; }
+            } catch (e) {
+                // fallback on error
+            }
+            window.location.href = home;
+        }
     </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
