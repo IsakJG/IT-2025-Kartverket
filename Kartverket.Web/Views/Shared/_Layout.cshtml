@@ -81,10 +81,27 @@
     {
         <header class="border-b bg-white">
             <nav class="container flex items-center justify-between py-3">
-                <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
-                   asp-area="" asp-controller="Home" asp-action="MainPage">
-                    Kartverket.Web
-                </a>
+                @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                {
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                       asp-controller="Registrar" asp-action="RegisterMetode">
+                        Kartverket.Web
+                    </a>
+                }
+                else if (userRoles.Contains("Admin"))
+                {
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                       asp-controller="AdminPart" asp-action="Index">
+                        Kartverket.Web
+                    </a>
+                }
+                else
+                {
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
+                       asp-area="" asp-controller="Home" asp-action="MainPage">
+                        Kartverket.Web
+                    </a>
+                }
 
                 <!-- Mobile menu button -->
                 <button id="navToggle"
