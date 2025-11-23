@@ -1,7 +1,6 @@
 using Kartverket.Web.Controllers;
 using Kartverket.Web.Models;
 using Microsoft.AspNetCore.Mvc;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Kartverket.Web.Data;
 

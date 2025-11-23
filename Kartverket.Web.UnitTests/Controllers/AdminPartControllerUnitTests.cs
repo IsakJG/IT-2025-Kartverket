@@ -36,7 +36,7 @@ namespace Kartverket.Web.UnitTests.Controllers
         {
             var context = GetDbContext();
 
-            context.Users.Add(new User { UserId = 1, Username = "TestUser" });
+            context.Users.Add(new Models.Entities.User { UserId = 1, Username = "TestUser" });
             context.Roles.Add(new Role { RoleId = 1, RoleName = "Admin" });
             context.UserRoles.Add(new UserRole { UserId = 1, RoleId = 1 });
             context.SaveChanges();
@@ -109,7 +109,7 @@ namespace Kartverket.Web.UnitTests.Controllers
         {
             var context = GetDbContext();
 
-            context.Users.Add(new User
+            context.Users.Add(new Models.Entities.User
             {
                 UserId = 5,
                 Username = "John",

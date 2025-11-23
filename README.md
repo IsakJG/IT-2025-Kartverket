@@ -64,23 +64,24 @@ The project is organized as follows:
 ## Libraries used
 The project uses the following libraries that you may need to install:
 
-    ### NuGet Packages
-    - Aspire.MySqlConnector
-    - Aspire.Pomelo.EntityFrameworkCore.MySql  
-    - Pomelo.EntityFrameworkCore.MySql  
-    - Microsoft.EntityFrameworkCore.Design  
-    - Microsoft.EntityFrameworkCore.Tools  
-    - Microsoft.VisualStudio.Azure.Containers.Tools.Targets  
+### NuGet Packages
+- Aspire.MySqlConnector
+- Aspire.Pomelo.EntityFrameworkCore.MySql  
+- Pomelo.EntityFrameworkCore.MySql  
+- Microsoft.EntityFrameworkCore.Design  
+- Microsoft.EntityFrameworkCore.Tools  
+- Microsoft.VisualStudio.Azure.Containers.Tools.Targets
+- Moq
 
-    ### Client-side Libraries
-    - Tailwind CSS  
-    - jQuery  
-    - jQuery Validation  
-    - jQuery Validation Unobtrusive  
-    - Bootstrap  
-    - Leaflet  
-    - Leaflet.Draw  
-    - Leaflet.Draw  
+### Client-side Libraries
+- Tailwind CSS  
+- jQuery  
+- jQuery Validation  
+- jQuery Validation Unobtrusive  
+- Bootstrap  
+- Leaflet  
+- Leaflet.Draw  
+- Leaflet.Draw  
 
 ## Unit Tests
 The project includes a dedicated test project (Kartverket.Web.UnitTests) used to verify the logic of all main controllers.
@@ -100,4 +101,4 @@ The project includes a dedicated test project (Kartverket.Web.UnitTests) used to
 - RegistrarControllerUnitTests ✅
 
 # How to run the tests
- - dotnet test
+- dotnet test
