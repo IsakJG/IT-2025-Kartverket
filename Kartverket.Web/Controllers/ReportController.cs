@@ -153,7 +153,7 @@ public class ReportController : Controller
         double? lat = null;
         double? lng = null;
 
-        // GeoLocation parsing
+        // GeoLocation parsing - check if it's a simple lat/lng or full GeoJSON
         if (!string.IsNullOrWhiteSpace(r.GeoLocation))
         {
             try
@@ -161,6 +161,7 @@ public class ReportController : Controller
                 using var doc = JsonDocument.Parse(r.GeoLocation);
                 var root = doc.RootElement;
 
+                // Try to get lat/lng (for backwards compatibility)
                 if (root.TryGetProperty("lat", out var latProp))
                     lat = latProp.GetDouble();
 
@@ -185,7 +186,8 @@ public class ReportController : Controller
             DecisionAt   = r.DecisionAt,
             CreatedAt    = r.TimestampEntry != null
                            ? r.TimestampEntry.DateCreated
-                           : (DateTime?)null
+                           : (DateTime?)null,
+            GeometryGeoJson = r.GeoLocation  // Include the complete GeoJSON
         };
 
         return View(row);
