@@ -4,45 +4,91 @@
     ViewData["Title"] = "Overview";
 }
 
-<section class="mx-auto max-w-2xl">
-    <div class="bg-gray-300 rounded-3xl shadow-lg ring-1 ring-gray-200 p-6 space-y-4">
-        <header>
-            <h1 class="text-2xl font-semibold text-center">Obstacle Overview</h1>
-        </header>
+<section class="mx-auto max-w-4xl pt-10 px-4">
+    
+    <!-- Logo and Title on same line -->
+    <div class="flex items-center justify-center gap-4 mb-8">
+        <img src="~/images/KartverketLogo.svg"
+             alt="Kartverket"
+             class="h-16 w-auto" />
+        <h1 class="text-4xl font-medium text-gray-900">
+            Obstacle Overview
+        </h1>
+    </div>
 
-        <div class="space-y-6">
-            <div class="sm:col-span-1">
-                <div class="text-lg font-medium text-gray-900">Obstacle Name</div>
-                <div class="bg-white rounded-3xl px-6 py-4 text-sm text-black break-words">@Model.ObstacleName</div>
-            </div>
-            <div class="sm:col-span-1">
-                <div class="text-lg font-medium text-gray-900">Height (m)</div>
-                <div class="mt-1 bg-white rounded-3xl px-6 py-4 text-base">@Model.ObstacleHeight</div>
-            </div>
-            <div class="sm:col-span-1">
-                <div class="text-lg font-medium text-gray-900">Description</div>
-                <div class="bg-white rounded-3xl px-6 py-4 text-sm text-black break-words sm:col-span-3">@Model.ObstacleDescription</div>
+    <!-- Success Badge -->
+    <div class="text-center mb-8">
+        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Successfully Submitted
+        </span>
+    </div>
+
+    <!-- Obstacle Details Card -->
+    <div class="bg-white shadow-md rounded-2xl border border-gray-200 p-8 mb-6">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Obstacle Details
+        </h2>
+        
+        <!-- List of details -->
+        <div class="space-y-4">
+            <!-- Obstacle Name -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Obstacle Name</dt>
+                <dd class="text-base text-gray-900 font-semibold">@Model.ObstacleName</dd>
             </div>
 
-            <div class="sm:col-span-3">
-                <div id="map" class="w-full rounded-lg overflow-hidden shadow-sm" style="height: 300px;"></div>
-                <div class="text-lg font-medium text-gray-900">Location</div>
-                <div class="mt-1 bg-white rounded-3xl px-6 py-4 text-base text-gray-900">
-                    Latitude: @Model.Latitude.ToString("F6")<br />
-                    Longitude: @Model.Longitude.ToString("F6")
-                </div>
+            <!-- Height -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Height</dt>
+                <dd class="text-base text-gray-900">@Model.ObstacleHeight feet</dd>
             </div>
-        </div>
 
-        <div class="pt-2">
-            <a asp-controller="Home" asp-action="MainPage"
-               class="inline-block rounded-lg px-8 py-4 font-medium text-gray-900 bg-gray-400 rounded-full ring-1 ring-gray-300 hover:bg-gray-50">
-                Back to Home
-            </a>
+            <!-- Location -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Location</dt>
+                <dd class="text-sm text-gray-900 font-mono">
+                    @Model.Latitude.ToString("F6"), @Model.Longitude.ToString("F6")
+                </dd>
+            </div>
+
+            <!-- Description -->
+            <div class="flex items-start py-3">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Description</dt>
+                <dd class="text-base text-gray-700 leading-relaxed">@Model.ObstacleDescription</dd>
+            </div>
         </div>
     </div>
-</section>
 
+    <!-- Map Section -->
+    <div class="bg-white shadow-md rounded-2xl border border-gray-200 p-8 mb-6">
+        <h3 class="text-xl font-semibold mb-6 text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Location on Map
+        </h3>
+        <div id="map" class="w-full h-80 rounded-xl shadow-sm border border-gray-200"></div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mb-6">
+        <a asp-controller="Home" asp-action="MainPage"
+           class="inline-flex items-center px-6 py-3 rounded-xl bg-gray-400 hover:bg-gray-500 text-white font-semibold shadow-md hover:shadow-lg transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+</section>
 
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -56,6 +102,8 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        var marker = L.marker([@Model.Latitude, @Model.Longitude]).addTo(map);
+        var marker = L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
+            .bindPopup('<b>@Model.ObstacleName</b><br>Height: @Model.ObstacleHeight feet')
+            .openPopup();
     </script>
 }
