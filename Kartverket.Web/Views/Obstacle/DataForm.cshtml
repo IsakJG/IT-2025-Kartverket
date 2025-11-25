@@ -353,7 +353,7 @@
     <script>
         // Change submit button text to "Submit Draft" when required fields are not filled.
         (function () {
-            var $form = $('form');
+            var $form = $('form').not('header form');
             var $submit = $form.find('button[type="submit"]').first();
             var originalText = $submit.text().trim();
 
