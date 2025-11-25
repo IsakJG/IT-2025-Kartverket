@@ -55,20 +55,30 @@ public class ObstacleController : Controller
         var ts  = new TimestampEntry();
         _context.Timestamps.Add(ts);
 
-        //Lage posisjon fra skjema som Geiography string
-        var geoJson = JsonSerializer.Serialize(new
+        // Use the complete GeoJSON if available, otherwise fallback to lat/lng
+        string geoJson;
+        if (!string.IsNullOrEmpty(obstacledata.GeometryGeoJson))
         {
-                lat = obstacledata.Latitude ,
+            // Save the complete GeoJSON geometry (includes lines, points, etc.)
+            geoJson = obstacledata.GeometryGeoJson;
+        }
+        else
+        {
+            // Fallback: create simple point GeoJSON
+            geoJson = JsonSerializer.Serialize(new
+            {
+                lat = obstacledata.Latitude,
               lng =  obstacledata.Longitude
               
-        });
+            });
+        }
 
         var report = new Report
         {
             Title = obstacledata.ObstacleName,
             Description = obstacledata.ObstacleDescription,
-            HeightInFeet = obstacledata.ObstacleHeight, // cast double -> nullable short
-            GeoLocation = geoJson,
+            HeightInFeet = obstacledata.ObstacleHeight,
+            GeoLocation = geoJson, // Now saves the complete geometry!
 
             //Setter standardverdier for nå - kan ednres senere der det kommer fra den piloten som er logget inn
             StatusId = 1,      // 1 = Pending (fra seed)
