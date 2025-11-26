@@ -2,6 +2,25 @@
 @{
     ViewData["Title"] = "Validate Report";
     var reportId = Model.ReportId;
+    
+    // Parse GeoLocation to get lat/lng for map center
+    double? lat = null;
+    double? lng = null;
+    if (!string.IsNullOrWhiteSpace(Model.GeoLocation))
+    {
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(Model.GeoLocation);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("lat", out var latProp))
+                lat = latProp.GetDouble();
+
+            if (root.TryGetProperty("lng", out var lngProp))
+                lng = lngProp.GetDouble();
+        }
+        catch { }
+    }
 }
 
 <section class="mx-auto max-w-4xl pt-10 px-4">
@@ -75,18 +94,24 @@
                 </dd>
             </div>
 
-            <!-- Position -->
-            <div class="flex items-start py-3 border-b border-gray-200">
-                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Position</dt>
-                <dd class="text-sm text-gray-900 break-all">@(Model.GeoLocation ?? "N/A")</dd>
-            </div>
-
             <!-- Description -->
             <div class="flex items-start py-3">
                 <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Description</dt>
                 <dd class="text-base text-gray-700 leading-relaxed">@(Model.Description ?? "No description provided.")</dd>
             </div>
         </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="bg-white shadow-md rounded-2xl border border-gray-200 p-8 mb-6">
+        <h3 class="text-xl font-semibold mb-6 text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Location
+        </h3>
+        <div id="map" class="w-full h-80 rounded-xl shadow-sm border border-gray-200"></div>
     </div>
 
     <!-- Action Buttons Card -->
@@ -137,3 +162,39 @@
     </div>
 
 </section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const lat = @(lat ?? 59.9139);
+    const lon = @(lng ?? 10.7522);
+    const map = L.map('map').setView([lat, lon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    
+    @if (!string.IsNullOrWhiteSpace(Model.GeoLocation))
+    {
+        @:// Try to render the complete GeoJSON geometry
+        @:try {
+        @:    var geoJsonData = @Html.Raw(Model.GeoLocation);
+        @:    
+        @:    // Check if it's a Leaflet FeatureCollection or simple lat/lng
+        @:    if (geoJsonData.type === 'FeatureCollection' || geoJsonData.type === 'Feature') {
+        @:        // It's proper GeoJSON - render it
+        @:        var geoJsonLayer = L.geoJSON(geoJsonData).addTo(map);
+        @:        map.fitBounds(geoJsonLayer.getBounds());
+        @:    } else if (geoJsonData.lat && geoJsonData.lng) {
+        @:        // It's the old format with just lat/lng - show marker
+        @:        L.marker([geoJsonData.lat, geoJsonData.lng]).addTo(map).bindPopup('@Model.Title').openPopup();
+        @:    }
+        @:} catch (e) {
+        @:    console.error('Error rendering geometry:', e);
+        @:    // Fallback to marker if GeoJSON parsing fails
+        @:    if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup();  }
+        @:}
+    }
+    else
+    {
+        @:// No GeoJSON - use lat/lon for marker
+        @:L.marker([lat, lon]).addTo(map).openPopup();
+    }
+</script>
