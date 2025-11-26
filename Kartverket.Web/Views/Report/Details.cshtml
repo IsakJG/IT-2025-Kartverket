@@ -1,6 +1,11 @@
 ﻿@model Kartverket.Web.Models.ArchiveRow
 @{
     ViewData["Title"] = "Report Details";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+    if (string.IsNullOrEmpty(returnUrl))
+    {
+        returnUrl = Url.Action("Archive", "Report"); // Default fallback
+    }
 }
 
 <section class="mx-auto max-w-4xl pt-10 px-4">
@@ -107,14 +112,14 @@
         <div id="map" class="w-full h-80 rounded-xl shadow-sm border border-gray-200"></div>
     </div>
 
-    <!-- Back Button -->
+    <!-- Back Button (UPDATED) -->
     <div class="text-center mb-6">
-        <a asp-controller="Report" asp-action="Archive"
+        <a href="@returnUrl"
            class="inline-flex items-center px-6 py-3 rounded-xl bg-gray-400 hover:bg-gray-500 text-white font-semibold shadow-md hover:shadow-lg transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Archive
+            Back
         </a>
     </div>
 
