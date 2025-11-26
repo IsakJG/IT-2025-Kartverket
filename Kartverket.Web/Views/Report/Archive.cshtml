@@ -119,6 +119,7 @@
                                     <a asp-action="Details"
                                        asp-controller="Report"
                                        asp-route-id="@report.ReportID"
+                                       asp-route-returnUrl="@Url.Action("Archive", "Report")"
                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-green-800 text-white text-xs font-medium hover:bg-green-900 transition-colors">
                                         View
                                     </a>
