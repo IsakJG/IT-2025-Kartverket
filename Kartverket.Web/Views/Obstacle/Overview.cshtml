@@ -102,8 +102,28 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        var marker = L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
-            .bindPopup('<b>@Model.ObstacleName</b><br>Height: @Model.ObstacleHeight feet')
-            .openPopup();
+        @if (!string.IsNullOrEmpty(Model.GeometryGeoJson))
+        {
+            @:// Display the GeoJSON geometry (line or point)
+            @:try {
+            @:    var geoJsonData = @Html.Raw(Model.GeometryGeoJson);
+            @:    var geoJsonLayer = L.geoJSON(geoJsonData).addTo(map);
+            @:    // Fit map to show all geometries
+            @:    map.fitBounds(geoJsonLayer.getBounds());
+            @:} catch (e) {
+            @:    console.error('Error rendering GeoJSON:', e);
+            @:    // Fallback to marker if GeoJSON fails
+            @:    L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
+            @:        .bindPopup('<b>@Model.ObstacleName</b><br>Height: @Model.ObstacleHeight feet')
+            @:        .openPopup();
+            @:}
+        }
+        else
+        {
+            @:// Fallback to single marker if no GeoJSON
+            @:L.marker([@Model.Latitude, @Model.Longitude]).addTo(map)
+            @:    .bindPopup('<b>@Model.ObstacleName</b><br>Height: @Model.ObstacleHeight feet')
+            @:    .openPopup();
+        }
     </script>
 }
