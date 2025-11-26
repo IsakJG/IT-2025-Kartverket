@@ -127,7 +127,33 @@
     const lon = @(Model.Longitude ?? 0);
     const map = L.map('map').setView([lat, lon], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-    if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
+    
+    @if (!string.IsNullOrEmpty(Model.GeometryGeoJson))
+    {
+        @:// Try to render the complete GeoJSON geometry
+        @:try {
+        @:    var geoJsonData = @Html.Raw(Model.GeometryGeoJson);
+        @:    
+        @:    // Check if it's a Leaflet FeatureCollection or simple lat/lng
+        @:    if (geoJsonData.type === 'FeatureCollection' || geoJsonData.type === 'Feature') {
+        @:        // It's proper GeoJSON - render it
+        @:        var geoJsonLayer = L.geoJSON(geoJsonData).addTo(map);
+        @:        map.fitBounds(geoJsonLayer.getBounds());
+        @:    } else if (geoJsonData.lat && geoJsonData.lng) {
+        @:        // It's the old format with just lat/lng - show marker
+        @:        L.marker([geoJsonData.lat, geoJsonData.lng]).addTo(map).bindPopup('@Model.Title').openPopup();
+        @:    }
+        @:} catch (e) {
+        @:    console.error('Error rendering geometry:', e);
+        @:    // Fallback to marker if GeoJSON parsing fails
+        @:    if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
+        @:}
+    }
+    else
+    {
+        @:// No GeoJSON - use lat/lon for marker
+        @:if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
+    }
 </script>
 
 
