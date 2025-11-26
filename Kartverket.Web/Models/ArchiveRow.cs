@@ -14,4 +14,7 @@ public class ArchiveRow
     public DateTime? CreatedAt { get; set; }
     public DateTime? AssignedAt { get; set; }
     public DateTime? DecisionAt { get; set; }
+    
+    // Add this property to store the complete GeoJSON
+    public string? GeometryGeoJson { get; set; }
 }
