@@ -12,6 +12,9 @@ namespace Kartverket.Web.Models
         [EmailAddress]
         public string Email { get; set; }         // required by Create view
 
+        [Required]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+        [MaxLength(100, ErrorMessage = "Password cannot be longer than 100 characters")]
         [DataType(DataType.Password)]
         public string Password { get; set; }      // required by Create view
 
