@@ -1,27 +1,128 @@
 ﻿@model Kartverket.Web.Models.ArchiveRow
 @{
     ViewData["Title"] = "Report Details";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+    if (string.IsNullOrEmpty(returnUrl))
+    {
+        returnUrl = Url.Action("Archive", "Report"); // Default fallback
+    }
 }
 
-<section class="mx-auto max-w-4xl py-8">
-    <h1 class="text-4xl font-semibold text-center mb-6">@Model.Title</h1>
+<section class="mx-auto max-w-4xl pt-10 px-4">
+    
+    <!-- Logo and Title on same line -->
+    <div class="flex items-center justify-center gap-4 mb-8">
+        <img src="~/images/KartverketLogo.svg"
+             alt="Kartverket"
+             class="h-16 w-auto" />
+        <h1 class="text-4xl font-medium text-gray-900">
+            Report Details
+        </h1>
+    </div>
 
-    <div class="bg-gray-300 rounded-lg p-6 shadow mb-6">
-        <p><strong>Submitted by:</strong> @Model.Pilot</p>
-        <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Category:</strong> @Model.Category</p>
-        <p><strong>Height:</strong> @Model.HeightInFeet ft</p>
-        <p><strong>Description:</strong> @Model.Description</p>
-        <p><strong>Create date:</strong> @Model.CreatedAt?.ToString("yyyy-MM-dd HH:mm")</p>
-                    
-       </div>
+    <!-- Report Title -->
+    <div class="text-center mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800">@Model.Title</h2>
+    </div>
 
-    <div id="map" class="w-full h-64 rounded-lg shadow mb-6"></div>
+    <!-- Report Details Card -->
+    <div class="bg-white shadow-md rounded-2xl border border-gray-200 p-8 mb-6">
+        <h3 class="text-xl font-semibold mb-6 text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Information
+        </h3>
+        
+        <!-- List of details -->
+        <div class="space-y-4">
+            <!-- Report ID -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Report ID</dt>
+                <dd class="text-base text-gray-900 font-semibold">#@Model.ReportID</dd>
+            </div>
 
-    <a asp-controller="Report" asp-action="Archive"
-       class="inline-block bg-gray-400 hover:bg-gray-500 text-gray-900 font-medium px-4 py-2 rounded">
-       Back to archive
-    </a>
+            <!-- Submitted By -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Submitted By</dt>
+                <dd class="flex items-center">
+                    <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <span class="text-xs font-medium text-gray-600">
+                            @(Model.Pilot?.Substring(0, 1).ToUpper() ?? "?")
+                        </span>
+                    </div>
+                    <span class="text-base text-gray-900">@(Model.Pilot ?? "Unknown")</span>
+                </dd>
+            </div>
+
+            <!-- Status -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Status</dt>
+                <dd>
+                    @{
+                        var statusClass = Model.Status switch
+                        {
+                            "Approved" => "bg-green-100 text-green-800",
+                            "Rejected" => "bg-red-100 text-red-800",
+                            "Pending" => "bg-yellow-100 text-yellow-800",
+                            _ => "bg-gray-100 text-gray-800"
+                        };
+                    }
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @statusClass">
+                        @(Model.Status ?? "Unknown")
+                    </span>
+                </dd>
+            </div>
+
+            <!-- Category -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Category</dt>
+                <dd class="text-base text-gray-900">@(Model.Category ?? "N/A")</dd>
+            </div>
+
+            <!-- Height -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Height</dt>
+                <dd class="text-base text-gray-900">@Model.HeightInFeet feet</dd>
+            </div>
+
+            <!-- Created Date -->
+            <div class="flex items-start py-3 border-b border-gray-200">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Created Date</dt>
+                <dd class="text-base text-gray-900">@Model.CreatedAt?.ToString("yyyy-MM-dd HH:mm")</dd>
+            </div>
+
+            <!-- Description -->
+            <div class="flex items-start py-3">
+                <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Description</dt>
+                <dd class="text-base text-gray-700 leading-relaxed">@(Model.Description ?? "No description provided.")</dd>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="bg-white shadow-md rounded-2xl border border-gray-200 p-8 mb-6">
+        <h3 class="text-xl font-semibold mb-6 text-gray-900 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Location
+        </h3>
+        <div id="map" class="w-full h-80 rounded-xl shadow-sm border border-gray-200"></div>
+    </div>
+
+    <!-- Back Button (UPDATED) -->
+    <div class="text-center mb-6">
+        <a href="@returnUrl"
+           class="inline-flex items-center px-6 py-3 rounded-xl bg-gray-400 hover:bg-gray-500 text-white font-semibold shadow-md hover:shadow-lg transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back
+        </a>
+    </div>
+
 </section>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -31,7 +132,33 @@
     const lon = @(Model.Longitude ?? 0);
     const map = L.map('map').setView([lat, lon], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-    if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
+    
+    @if (!string.IsNullOrEmpty(Model.GeometryGeoJson))
+    {
+        @:// Try to render the complete GeoJSON geometry
+        @:try {
+        @:    var geoJsonData = @Html.Raw(Model.GeometryGeoJson);
+        @:    
+        @:    // Check if it's a Leaflet FeatureCollection or simple lat/lng
+        @:    if (geoJsonData.type === 'FeatureCollection' || geoJsonData.type === 'Feature') {
+        @:        // It's proper GeoJSON - render it
+        @:        var geoJsonLayer = L.geoJSON(geoJsonData).addTo(map);
+        @:        map.fitBounds(geoJsonLayer.getBounds());
+        @:    } else if (geoJsonData.lat && geoJsonData.lng) {
+        @:        // It's the old format with just lat/lng - show marker
+        @:        L.marker([geoJsonData.lat, geoJsonData.lng]).addTo(map).bindPopup('@Model.Title').openPopup();
+        @:    }
+        @:} catch (e) {
+        @:    console.error('Error rendering geometry:', e);
+        @:    // Fallback to marker if GeoJSON parsing fails
+        @:    if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
+        @:}
+    }
+    else
+    {
+        @:// No GeoJSON - use lat/lon for marker
+        @:if (lat && lon) { L.marker([lat, lon]).addTo(map).bindPopup('@Model.Title').openPopup(); }
+    }
 </script>
 
 

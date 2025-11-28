@@ -1,29 +1,59 @@
 @{
-    ViewData["Title"] = "Main Page";
+    ViewData["Title"] = "Pilot Main Page";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var username = (User?.Identity?.IsAuthenticated ?? false) ? User.Identity!.Name : "Username";
+    var username = Context.Session.GetString("Username") ?? "Username";
 }
 
-<main class="min-h-[calc(100vh-64px)]">
-  <div class="max-w-5xl mx-auto px-4 py-10 sm:py-16">
-    <h1 class="text-center text-4xl sm:text-5xl font-semibold text-gray-800 mb-12">Main Page </h1>
+<section class="mx-auto max-w-4xl pt-10">
 
-    <!-- To store runde knapper -->
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
-      <!-- Register Obstacle -->
-      <a asp-controller="Obstacle" asp-action="DataForm"
-         class="inline-flex items-center justify-center rounded-full shadow-md border px-10 py-8 sm:px-12 sm:py-10
-                text-xl sm:text-2xl font-medium bg-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition"
-         style="border-radius: 9999px;">
-        Register<br class="hidden sm:block"> Obstacle
-      </a>
-
-      <!-- Report Archive -->
-      <a asp-controller="Report" asp-action="Archive"
-         class="inline-flex items-center justify-center rounded-full shadow-md border px-10 py-8 sm:px-12 sm:py-10
-                text-xl sm:text-2xl font-medium bg-gray-300 hover:shadow-lg hover:-translate-y-0.5 transition">
-        Report<br class="hidden sm:block"> Archive
-      </a>
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+        <img src="~/images/KartverketLogo.svg"
+             alt="Kartverket"
+             class="h-20 w-auto" />
     </div>
-  </div>
-</main>
+
+    <!-- Title -->
+    <h1 class="text-4xl font-medium text-center text-gray-900 mb-2">
+        Welcome @username
+    </h1>
+    <p class="text-center text-gray-600 mb-12">
+        Pilot Main Page
+    </p>
+
+    <!-- Action Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+
+        <!-- Register Obstacle Card -->
+        <a asp-controller="Obstacle" asp-action="DataForm"
+           class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
+            <div class="flex flex-col items-center text-center space-y-4">
+                <div class="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-1">Register Obstacle</h2>
+                    <p class="text-sm text-gray-600">Report a new aviation obstacle</p>
+                </div>
+            </div>
+        </a>
+
+        <!-- Report Archive Card -->
+        <a asp-controller="Report" asp-action="ArchivePilot"
+           class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
+            <div class="flex flex-col items-center text-center space-y-4">
+                <div class="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-1">Report Archive</h2>
+                    <p class="text-sm text-gray-600">Browse all submitted reports</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</section>

@@ -153,7 +153,7 @@ public class ReportController : Controller
         double? lat = null;
         double? lng = null;
 
-        // GeoLocation parsing
+        // GeoLocation parsing - check if it's a simple lat/lng or full GeoJSON
         if (!string.IsNullOrWhiteSpace(r.GeoLocation))
         {
             try
@@ -161,6 +161,7 @@ public class ReportController : Controller
                 using var doc = JsonDocument.Parse(r.GeoLocation);
                 var root = doc.RootElement;
 
+                // Try to get lat/lng (for backwards compatibility)
                 if (root.TryGetProperty("lat", out var latProp))
                     lat = latProp.GetDouble();
 
@@ -185,7 +186,8 @@ public class ReportController : Controller
             DecisionAt   = r.DecisionAt,
             CreatedAt    = r.TimestampEntry != null
                            ? r.TimestampEntry.DateCreated
-                           : (DateTime?)null
+                           : (DateTime?)null,
+            GeometryGeoJson = r.GeoLocation  // Include the complete GeoJSON
         };
 
         return View(row);
@@ -232,4 +234,63 @@ public class ReportController : Controller
         return RedirectToAction("ActiveReports");
     }
    
+   //Archive pilot view
+    public async Task<IActionResult> ArchivePilot()
+    {
+        
+        int? userId = HttpContext.Session.GetInt32("UserId");
+        
+ 
+        var reports = await _context.Reports
+            .Include(r => r.User)
+            .Include(r => r.Status)
+            .Include(r => r.Category)
+            .Include(r => r.TimestampEntry)
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.ReportId)
+            .ToListAsync();
+
+        var data = reports.Select(r =>
+        {
+            double? lat = null;
+            double? lng = null;
+
+            // GeoLocation parsing (fra din kode)
+            if (!string.IsNullOrWhiteSpace(r.GeoLocation))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(r.GeoLocation);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("lat", out var latProp))
+                        lat = latProp.GetDouble();
+
+                    if (root.TryGetProperty("lng", out var lngProp))
+                        lng = lngProp.GetDouble();
+                }
+                catch { } // Ignorer feilformatert JSON
+            }
+
+            return new ArchiveRow
+            {
+                ReportID     = r.ReportId,
+                Title        = r.Title,
+                Pilot        = r.User?.Username,
+                Status       = r.Status?.StatusName,
+                Category     = r.Category?.CategoryName,
+                HeightInFeet = r.HeightInFeet,
+                Description  = r.Description,
+                Latitude     = lat,
+                Longitude    = lng,
+                AssignedAt   = r.AssignedAt,
+                DecisionAt   = r.DecisionAt,
+                CreatedAt    = r.TimestampEntry != null
+                               ? r.TimestampEntry.DateCreated
+                               : (DateTime?)null
+            };
+        }).ToList();
+
+        return View(data);
+    }
 }
