@@ -5,11 +5,12 @@ using Kartverket.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
+[Authorize(Roles = "Admin")] //Låser hele controlleren for alle som IKKE er Admin
 public class AdminPartController : Controller
 {
     private readonly KartverketDbContext _db;
-
     public AdminPartController(KartverketDbContext db)
     {
         _db = db;

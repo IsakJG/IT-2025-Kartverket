@@ -4,8 +4,10 @@ using Kartverket.Web.Data;
 using Kartverket.Web.Models.Entities;
 using Kartverket.Web.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 
+[Authorize]
 public class ReportController : Controller 
 {
     private readonly KartverketDbContext _context;
@@ -27,6 +29,8 @@ public class ReportController : Controller
         return View(activeReports);
     }
     */
+
+    [Authorize(Roles = "Registar")]
     public async Task<IActionResult> ActiveReports()
 {
     var reports = await _context.Reports
@@ -84,6 +88,8 @@ public class ReportController : Controller
 }
 
     //Archive view
+
+    [Authorize(Roles = "Registar, Admin")] //Kun Registrar og Admin kan se hele arkivet
     public async Task<IActionResult> Archive()
     {
         var reports = await _context.Reports
@@ -138,6 +144,8 @@ public class ReportController : Controller
         return View(data);
     }
     // NY: Detaljside for en rapport
+
+
     public async Task<IActionResult> Details(int id)
     {
         var r = await _context.Reports
@@ -194,6 +202,8 @@ public class ReportController : Controller
     }
 
     // NY: Validation og godkjenning/avvisning (flyttet fra AdminController)
+
+    [Authorize(Roles = "Registar")]
     public async Task<IActionResult> ValidateReport(int reportId)
     {
         var report = await _context.Reports
@@ -208,6 +218,7 @@ public class ReportController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Registar")]//Sikrer godkjenn-knappen
     public async Task<IActionResult> ApproveReport(int reportId)
     {
         var report = await _context.Reports.FindAsync(reportId);
@@ -222,6 +233,7 @@ public class ReportController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Registar")] //Sikrer avvis-knappen
     public async Task<IActionResult> RejectReport(int reportId)
     {
         var report = await _context.Reports.FindAsync(reportId);
@@ -235,6 +247,7 @@ public class ReportController : Controller
     }
    
    //Archive pilot view
+   [Authorize(Roles = "Pilot")]
     public async Task<IActionResult> ArchivePilot()
     {
         

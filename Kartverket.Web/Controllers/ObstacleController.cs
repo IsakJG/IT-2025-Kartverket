@@ -5,9 +5,11 @@ using System.Text.Json;
 using Kartverket.Web.Data;
 using Kartverket.Web.Models.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kartverket.Web.Controllers;
 
+[Authorize(Roles = "Pilot")]
 public class ObstacleController : Controller
 {
     private readonly KartverketDbContext _context;

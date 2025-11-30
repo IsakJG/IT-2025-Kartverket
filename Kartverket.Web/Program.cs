@@ -118,6 +118,35 @@ app.UseRouting();
 // 🔒 BRUK SESSION MIDDLEWARE FØR AUTHORIZATION
 app.UseSession();
 
+// --- Oversetter Session til Bruker-Rettigheter ---
+app.Use(async (context, next) =>
+{
+    var userId = context.Session.GetInt32("UserId");
+    var rolesString = context.Session.GetString("UserRoles");
+    var username = context.Session.GetString("Username");
+
+    if (userId.HasValue && !string.IsNullOrEmpty(rolesString))
+    {
+        var claims = new List<System.Security.Claims.Claim>
+        {
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, username ?? ""),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, userId.Value.ToString())
+        };
+
+        // Splitter rollene hvis en bruker har flere, og legger dem til systemet
+        foreach (var role in rolesString.Split(','))
+        {
+            claims.Add(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, role.Trim()));
+        }
+
+        var identity = new System.Security.Claims.ClaimsIdentity(claims, "SessionAuth");
+        context.User = new System.Security.Claims.ClaimsPrincipal(identity);
+    }
+
+    await next();
+});
+
+
 app.UseAuthorization();
 
 // Database seeding og migrering
