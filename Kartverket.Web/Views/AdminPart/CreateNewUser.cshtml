@@ -92,7 +92,6 @@
 
 <div class="admin-page">
 
-    <!-- Header -->
     <div class="kv-header">
         <div class="kv-brand">
             <img src="~/images/KartverketLogo.svg" alt="Kartverket" />
@@ -103,37 +102,36 @@
     <h1 class="admin-heading">Create User</h1>
     <p class="admin-subtitle">Add a new user with role and login credentials</p>
 
-    <!-- Form card -->
     <div class="form-card">
 
         <form asp-action="Create" method="post">
 
-            <!-- Username -->
             <label asp-for="UserName" class="form-label">Username</label>
             <input asp-for="UserName" class="form-input" placeholder="Username" />
             <span asp-validation-for="UserName" class="text-red-600 text-sm"></span>
 
-            <!-- Email -->
             <label asp-for="Email" class="form-label">Email</label>
             <input asp-for="Email" class="form-input" placeholder="email@example.com" />
             <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
 
-            <!-- Password -->
             <label asp-for="Password" class="form-label">Password</label>
             <input asp-for="Password" type="password" class="form-input" placeholder="Enter password" />
             <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
 
-            <!-- Role -->
             <label asp-for="RoleId" class="form-label">Role</label>
             <select asp-for="RoleId" asp-items="ViewBag.Roles" class="form-input">
                 <option value="">Select a role</option>
             </select>
             <span asp-validation-for="RoleId" class="text-red-600 text-sm"></span>
+            
+            <label asp-for="OrgId" class="form-label">Organization</label>
+            <select asp-for="OrgId" asp-items="ViewBag.Organizations" class="form-input">
+                <option value="">Select an organization</option>
+            </select>
+            <span asp-validation-for="OrgId" class="text-red-600 text-sm"></span>
 
-            <!-- Submit -->
             <div class="mt-4">
                 <button type="submit" class="btn-submit">Create</button>
-
                 <a asp-action="Index" class="btn-cancel">Cancel</a>
             </div>
 

@@ -1,0 +1,95 @@
+@model Kartverket.Web.Models.CreateOrgViewModel
+@{
+    ViewData["Title"] = "Create Organization";
+}
+
+<style>
+    body {
+        background: #f5f3f0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .admin-page {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 0 16px;
+    }
+
+    .form-card {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid #e2e2e2;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .btn-submit {
+        background: #007047;
+        color: #fff;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        filter: brightness(1.05);
+    }
+
+    .btn-cancel {
+        padding: 12px 28px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        margin-left: 8px;
+        color: #333;
+    }
+
+    .btn-cancel:hover {
+        background: #f5f5f5;
+    }
+    
+    .admin-heading {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="admin-page">
+    <h1 class="admin-heading">Create Organization</h1>
+    
+    <div class="form-card">
+        <form asp-action="CreateOrganization" method="post">
+            
+            <label asp-for="OrgName" class="form-label">Organization Name</label>
+            <input asp-for="OrgName" class="form-input" placeholder="e.g. Redningsselskapet" />
+            <span asp-validation-for="OrgName" class="text-red-600 text-sm"></span>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn-submit">Create Organization</button>
+                <a asp-action="ManageOrganizations" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
