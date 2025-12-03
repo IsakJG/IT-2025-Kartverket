@@ -163,6 +163,13 @@ using (var scope = app.Services.CreateScope())
             new Status { StatusId = 2, StatusName = "Rejected" },
             new Status { StatusId = 3, StatusName = "Approved" }
         );
+        db.SaveChanges();
+    }
+
+    if (!db.Statuses.Any(s => s.StatusId == 4))
+    {
+        db.Statuses.Add(new Status { StatusId = 4, StatusName = "Draft"});
+        db.SaveChanges();
     }
     //Category
     if (!db.Categories.Any())
