@@ -6,6 +6,7 @@ using Kartverket.Web.Data;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Logging;
 
 namespace Kartverket.Web.UnitTests.Controllers;
 
@@ -22,7 +23,8 @@ public class ObstacleControllersTests
 
     private ObstacleController GetControllerWithMockedSession(KartverketDbContext context)
     {
-        var controller = new ObstacleController(context);
+        var mockLogger = new Mock<ILogger<ObstacleController>>();
+        var controller = new ObstacleController(context, mockLogger.Object);
 
         // Mock HttpContext og Session
         var httpContext = new DefaultHttpContext();
@@ -73,7 +75,8 @@ public class ObstacleControllersTests
     public void DataFormViewResult() //Tester at skjema-siden faktisk vises i nettleseren
     {
         var context = GetDbContext();
-        var controller = new ObstacleController(context);
+        var mockLogger = new Mock<ILogger<ObstacleController>>();
+        var controller = new ObstacleController(context, mockLogger.Object);
 
         var result = controller.DataForm();
 
@@ -95,7 +98,7 @@ public class ObstacleControllersTests
             Longitude = 73.141592
         };
 
-        var result = await controller.DataForm(obstacledata);
+        var result = await controller.SaveReport(obstacledata, "submit");
 
         // Konverter retur til ViewResult
         var view = Assert.IsType<ViewResult>(result);

@@ -11,6 +11,7 @@ using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace Kartverket.Web.UnitTests.Controllers
 {
@@ -25,12 +26,18 @@ namespace Kartverket.Web.UnitTests.Controllers
             return new KartverketDbContext(options);
         }
 
+        private ILogger<ReportController> GetLogger()
+        {
+            return Mock.Of<ILogger<ReportController>>();
+        }
+
         // tester at ActiveReports returnerer en ViewResult
         [Fact]
         public async Task ActiveReports_ReturnsViewResult()
         {
             var context = GetDbContext();
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             var result = await controller.ActiveReports();
 
@@ -42,7 +49,8 @@ namespace Kartverket.Web.UnitTests.Controllers
         public async Task Archive_ReturnsViewResult()
         {
             var context = GetDbContext();
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             var result = await controller.Archive();
 
@@ -69,7 +77,8 @@ namespace Kartverket.Web.UnitTests.Controllers
             context.Reports.Add(report);
             await context.SaveChangesAsync();
 
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             var result = await controller.Details(1);
 
@@ -84,7 +93,8 @@ namespace Kartverket.Web.UnitTests.Controllers
         public async Task Details_InvalidId_ReturnsNotFound()
         {
             var context = GetDbContext();
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             var result = await controller.Details(999);
 
@@ -105,7 +115,8 @@ namespace Kartverket.Web.UnitTests.Controllers
 
             await context.SaveChangesAsync();
 
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             var result = await controller.ValidateReport(10);
 
@@ -117,7 +128,8 @@ namespace Kartverket.Web.UnitTests.Controllers
         public async Task ValidateReport_InvalidId_ReturnsNotFound()
         {
             var context = GetDbContext();
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             var result = await controller.ValidateReport(12345);
 
@@ -138,7 +150,8 @@ namespace Kartverket.Web.UnitTests.Controllers
 
             await context.SaveChangesAsync();
 
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             controller.TempData = new TempDataDictionary(
                 new DefaultHttpContext(),
@@ -167,7 +180,8 @@ namespace Kartverket.Web.UnitTests.Controllers
 
             await context.SaveChangesAsync();
 
-            var controller = new ReportController(context);
+            var logger = GetLogger();
+            var controller = new ReportController(context, logger);
 
             controller.TempData = new TempDataDictionary(
                 new DefaultHttpContext(),
