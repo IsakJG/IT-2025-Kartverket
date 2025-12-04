@@ -18,7 +18,16 @@
     /* NOTE: Internal styles preserved for specific view context */
     body { background: #f5f3f0; font-family: system-ui, sans-serif; }
     .admin-page { max-width: 800px; margin: 20px auto; padding: 0 16px; }
-    
+    .admin-heading {
+        font-size: 26px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .admin-subtitle {
+        color: #555;
+        margin-bottom: 20px;
+    }
     .org-card {
         background: #fff;
         padding: 16px;
@@ -79,10 +88,41 @@
         font-size: 0.85rem;
         margin-top: 4px;
     }
+    .kv-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+    }
+
+    .kv-brand {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+        .kv-brand img {
+            height: 60px;
+            width: auto;
+        }
+
+    .kv-title {
+        font-size: 48px;
+        font-weight: 500;
+    }
+
 </style>
 
 <div class="admin-page">
-    <h1 style="font-size: 2rem; font-weight: 600;">Organizations</h1>
+    <div class="kv-header">
+        <div class="kv-brand">
+            @* Url.Content sikrer at bildet lastes riktig selv om appen kjører i en undermappe *@
+            <img src="@Url.Content("~/images/Kartverketlogo.svg")" alt="Kartverket" />
+            <span class="kv-title">Kartverket</span>
+        </div>
+    </div>
+    <h1 class="admin-heading">Organization</h1>
+
     <p style="color: #666; margin-bottom: 20px;">Manage organizations available in the system</p>
 
     @* Feedback messages from TempData (Success/Error) *@
