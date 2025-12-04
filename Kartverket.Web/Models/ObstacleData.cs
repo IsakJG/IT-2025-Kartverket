@@ -3,12 +3,13 @@ using System.ComponentModel.DataAnnotations;
 namespace Kartverket.Web.Models;
 public class ObstacleData
 {
+    public int? ReportId {get; set;}
     [MaxLength(100)]
     public string ObstacleName { get; set; }
 
-    [Required(ErrorMessage = "Field is required")]
+    
     [Range(0, 20000000)]// sette  max verdi til noe fornuftig
-    public double ObstacleHeight { get; set; }
+    public double? ObstacleHeight { get; set; }
 
     [MaxLength(1000)]
     public string ObstacleDescription { get; set; }
