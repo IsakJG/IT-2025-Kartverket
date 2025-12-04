@@ -11,16 +11,16 @@ namespace Kartverket.Web.Models
         /// <summary>
         /// Brukerens brukernavn.
         /// </summary>
-        [Required(ErrorMessage = "Brukernavn er påkrevd.")]
-        [Display(Name = "Brukernavn")]
+        [Required(ErrorMessage = "Username is required.")]
+        [Display(Name = "Username")]
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
         /// Brukerens passord.
         /// </summary>
-        [Required(ErrorMessage = "Passord er påkrevd.")]
+        [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)] // Forteller Viewet at dette skal være et passordfelt (skjult tekst)
-        [Display(Name = "Passord")]
+        [Display(Name = "Password")]
         public string Password { get; set; } = string.Empty;
     }
 
