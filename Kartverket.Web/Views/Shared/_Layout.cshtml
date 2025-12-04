@@ -54,8 +54,8 @@
             
             <div class="flex items-center gap-4">
                 <a class="text-xl font-bold tracking-tight text-brand dark:text-green-400 hover:opacity-80 transition-opacity flex items-center gap-2"
-                   asp-controller="@(isLoggedIn ? (userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "Registrar" : "Pilot")) : "Home")" 
-                   asp-action="@(isLoggedIn ? (userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "RegisterMetode" : "MainPage")) : "Index")">
+                   asp-controller="@(isLoggedIn ? (userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "Registrar" : (userRoles.Contains("Pilot") ? "Home" : "Home"))) : "Home")" 
+                   asp-action="@(isLoggedIn ? (userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "RegisterMetode" : (userRoles.Contains("Pilot") ? "MainPage" : "MainPage"))) : "Index")">
                     
                     <img src="@Url.Content("~/images/Kartverketlogo.svg")" alt="Logo" class="h-8 w-auto" />
                     <span class="hidden sm:inline">Kartverket.Web</span>
@@ -85,7 +85,7 @@
 
                         <li class="w-full md:w-auto">
                             <a class="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-center"
-                               asp-controller="@(userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "Registrar" : "Pilot"))" 
+                               asp-controller="@(userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "Registrar" : "Home"))" 
                                asp-action="@(userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "RegisterMetode" : "MainPage"))">
                                 Dashboard
                             </a>
