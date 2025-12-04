@@ -20,8 +20,7 @@ namespace Kartverket.Web.Controllers
         // Konstanter for Roller og Session-nøkler (Best Practice for å unngå skrivefeil)
         private const int DefaultRoleId = 3; // Pilot
         private const string RoleAdmin = "Admin";
-        private const string RoleRegistrar = "Registrar"; // Rettet skrivefeil fra "Registar"
-        
+        private const string RoleRegistrar = "Registar";       
         private const string SessionKeyUserId = "UserId";
         private const string SessionKeyUsername = "Username";
         private const string SessionKeyEmail = "Email";
