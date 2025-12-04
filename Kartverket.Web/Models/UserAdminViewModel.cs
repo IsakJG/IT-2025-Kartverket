@@ -27,7 +27,9 @@ namespace Kartverket.Web.Models
         /// <summary>
         /// Password is optional when editing (null means "do not change").
         /// </summary>
-        [Display(Name = "Password (leave blank to keep unchanged)")]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+        [MaxLength(100, ErrorMessage = "Password cannot be longer than 100 characters")]
+        [Display(Name = "Password")]
         [DataType(DataType.Password)] // Masks input in the browser
         public string? Password { get; set; }
 
