@@ -34,15 +34,15 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @* Darkmode.css er nå integrert via Tailwind, men beholdes hvis du har spesifikke overstyringer *@
     <link rel="stylesheet" href="~/css/Darkmode.css" asp-append-version="true" />
 </head>
 <body class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
     
     @{
-        // Hent innlogget brukerinfo sikkert
+        // Hent innlogget brukerinfo sikkert fra Session
         var isLoggedIn = Context.Session.GetInt32("UserId").HasValue;
         var roleString = Context.Session.GetString("UserRoles");
+        // Splitter roller og håndterer null-verdier
         var userRoles = !string.IsNullOrEmpty(roleString) 
             ? roleString.Split(',') 
             : Array.Empty<string>();
@@ -54,9 +54,10 @@
             
             <div class="flex items-center gap-4">
                 <a class="text-xl font-bold tracking-tight text-brand dark:text-green-400 hover:opacity-80 transition-opacity flex items-center gap-2"
-                   asp-controller="@(isLoggedIn ? (userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") ? "Registrar" : "Pilot")) : "Home")" 
-                   asp-action="@(isLoggedIn ? (userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") ? "RegisterMetode" : "MainPage")) : "Index")">
-                    <img src="@Url.Content("~/images/KartverketLogo.svg")" alt="Logo" class="h-8 w-auto" />
+                   asp-controller="@(isLoggedIn ? (userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "Registrar" : "Pilot")) : "Home")" 
+                   asp-action="@(isLoggedIn ? (userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "RegisterMetode" : "MainPage")) : "Index")">
+                    
+                    <img src="@Url.Content("~/images/Kartverketlogo.svg")" alt="Logo" class="h-8 w-auto" />
                     <span class="hidden sm:inline">Kartverket.Web</span>
                 </a>
             </div>
@@ -84,14 +85,15 @@
 
                         <li class="w-full md:w-auto">
                             <a class="block px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-center"
-                               asp-controller="@(userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") ? "Registrar" : "Pilot"))" 
-                               asp-action="@(userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") ? "RegisterMetode" : "MainPage"))">
+                               asp-controller="@(userRoles.Contains("Admin") ? "AdminPart" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "Registrar" : "Pilot"))" 
+                               asp-action="@(userRoles.Contains("Admin") ? "Index" : (userRoles.Contains("Registar") || userRoles.Contains("Registrar") ? "RegisterMetode" : "MainPage"))">
                                 Dashboard
                             </a>
                         </li>
 
                         <li class="w-full md:w-auto">
                             <form asp-controller="Auth" asp-action="Logout" method="post" class="w-full">
+                                @Html.AntiForgeryToken()
                                 <button type="submit" class="w-full md:w-auto px-4 py-2 rounded-md bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 transition-colors font-medium">
                                     Log out
                                 </button>
@@ -198,7 +200,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Include CSRF Token
+                        // Include CSRF Token found in meta tag
                         'RequestVerificationToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ isDarkMode: !isDark })
@@ -217,7 +219,7 @@
         }
         
         // --- 3. AJAX CSRF Setup (Global) ---
-        // Ensures all fetch requests include the anti-forgery token
+        // Ensures all fetch requests automatically include the anti-forgery token
         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
         if (csrfMeta) {
             const token = csrfMeta.getAttribute('content');
@@ -226,7 +228,7 @@
             window.fetch = function(...args) {
                 const [url, options = {}] = args;
                 
-                // Only add headers to non-GET requests
+                // Only add headers to non-GET requests (POST, PUT, DELETE)
                 if (options.method && options.method.toUpperCase() !== 'GET') {
                     options.headers = {
                         ...options.headers,
