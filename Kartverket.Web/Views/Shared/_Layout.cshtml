@@ -14,11 +14,16 @@
 
     <!-- Dark Mode Script (must run before page renders to prevent FOUC) -->
     <script>
-        // Initialize dark mode before page loads - ONLY if explicitly set to dark
+        // Initialize to light mode by default - only enable dark if explicitly saved
         if (localStorage.theme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
+            // Ensure we start in light mode (remove any dark class)
             document.documentElement.classList.remove('dark');
+            // Set light mode as default if nothing is saved
+            if (!localStorage.theme) {
+                localStorage.theme = 'light';
+            }
         }
     </script>
 
