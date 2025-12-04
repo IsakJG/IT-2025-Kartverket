@@ -55,6 +55,8 @@ public class HomeController : Controller
     public class DarkModeRequest
     {
         public bool IsDarkMode { get; set; }
+    }
+
     public IActionResult PasswordChange() 
     {
         // Get the current user's ID from session (or authentication)
