@@ -1,9 +1,23 @@
 ﻿@model Kartverket.Web.Models.UserAdminViewModel
+
+@* ---------------------------------------------------------------------------
+    View: Create User
+    Role: Admin
+    Description: 
+        Presenterer et skjema for opprettelse av nye brukere. 
+        Henter data for roller og organisasjoner via ViewBag for dynamiske nedtrekkslister.
+        Bruker Tag Helpers for binding mot UserAdminViewModel.
+    ---------------------------------------------------------------------------
+*@
+
 @{
     ViewData["Title"] = "Create User";
 }
 
 <style>
+    /* NOTE: Styles are kept internal for this view to maintain self-containment 
+       in this specific context, ensuring consistent design without external dependencies.
+    */
     body {
         background: #f5f3f0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -88,6 +102,13 @@
         .btn-cancel:hover {
             background: #f5f5f5;
         }
+        
+    /* Utility class for validation summary text */
+    .validation-summary-errors {
+        color: #dc2626;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
 </style>
 
 <div class="admin-page">
@@ -105,26 +126,35 @@
     <div class="form-card">
 
         <form asp-action="Create" method="post">
+            
+            @* Validation Summary: Fanger opp feil som ikke tilhører et spesifikt felt 
+               (f.eks. database-tilkoblingsfeil eller validering på tvers av felter).
+            *@
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
-            <label asp-for="UserName" class="form-label">Username</label>
+            @* Ved å la label-taggen være tom, henter Razor automatisk verdien fra 
+               [Display(Name="...")] i ViewModel. Dette sikrer konsistens (DRY).
+            *@
+
+            <label asp-for="UserName" class="form-label"></label>
             <input asp-for="UserName" class="form-input" placeholder="Username" />
             <span asp-validation-for="UserName" class="text-red-600 text-sm"></span>
 
-            <label asp-for="Email" class="form-label">Email</label>
+            <label asp-for="Email" class="form-label"></label>
             <input asp-for="Email" class="form-input" placeholder="email@example.com" />
             <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
 
-            <label asp-for="Password" class="form-label">Password</label>
-            <input asp-for="Password" type="password" class="form-input" placeholder="Enter password" />
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-input" placeholder="Enter password" />
             <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
 
-            <label asp-for="RoleId" class="form-label">Role</label>
+            <label asp-for="RoleId" class="form-label"></label>
             <select asp-for="RoleId" asp-items="ViewBag.Roles" class="form-input">
                 <option value="">Select a role</option>
             </select>
             <span asp-validation-for="RoleId" class="text-red-600 text-sm"></span>
             
-            <label asp-for="OrgId" class="form-label">Organization</label>
+            <label asp-for="OrgId" class="form-label"></label>
             <select asp-for="OrgId" asp-items="ViewBag.Organizations" class="form-input">
                 <option value="">Select an organization</option>
             </select>

@@ -1,22 +1,27 @@
 using System.ComponentModel.DataAnnotations;
+using Kartverket.Web.Models;
 
 namespace Kartverket.Web.Models
 {
+    /// <summary>
+    /// ViewModel for sikker endring av passord.
+    /// </summary>
     public class ChangePasswordViewModel
     {
-        public int Id { get; set; } // User ID
+        public int Id { get; set; }
 
-        [Required(ErrorMessage = "New password is required")]
-        [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
-        [MaxLength(100, ErrorMessage = "Password cannot be longer than 100 characters")]
+        [Required(ErrorMessage = "New password is required.")]
+        // StringLength kombinerer Min og Max på en ryddig måte
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "The {0} must be at least {2} characters long.")]
         [DataType(DataType.Password)]
         [Display(Name = "New Password")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Please confirm your new password")]
+        [Required(ErrorMessage = "Please confirm your new password.")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm New Password")]
-        [Compare("Password", ErrorMessage = "Passwords do not match")]
-        public string ConfirmPassword { get; set; }
+        // Bruker nameof() for å sikre typesikkerhet ved refaktorering
+        [Compare(nameof(Password), ErrorMessage = "The passwords do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

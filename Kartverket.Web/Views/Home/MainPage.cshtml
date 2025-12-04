@@ -1,13 +1,27 @@
+@* ---------------------------------------------------------------------------
+    View: Pilot Dashboard (MainPage)
+    Role: Pilot
+    Description: 
+        Landingsside for piloter etter innlogging.
+        Gir rask tilgang til hovedfunksjoner: Registrering, Utkast, Passordbytte og Arkiv.
+    --------------------------------------------------------------------------- 
+*@
+
 @{
     ViewData["Title"] = "Pilot Main Page";
+    // Layout defineres vanligvis i _ViewStart.cshtml, men kan overstyres her ved behov.
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var username = Context.Session.GetString("Username") ?? "Username";
+    
+    // Henter brukernavn fra Session for personalisering.
+    // Fallback til "Pilot" hvis sesjonsvariabelen er null.
+    var username = Context.Session.GetString("Username") ?? "Pilot";
 }
 
 <section class="mx-auto max-w-4xl pt-10 px-4">
 
     <div class="flex justify-center mb-6">
-        <img src="~/images/KartverketLogo.svg"
+        @* Url.Content sikrer at bildestien er robust uavhengig av deployment-miljø *@
+        <img src="@Url.Content("~/images/KartverketLogo.svg")"
              alt="Kartverket"
              class="h-20 w-auto" />
     </div>
@@ -25,7 +39,8 @@
            class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
             <div class="flex flex-col items-center text-center space-y-4">
                 <div class="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    @* aria-hidden="true" skjuler dekorative ikoner for skjermlesere *@
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
@@ -40,7 +55,7 @@
            class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
             <div class="flex flex-col items-center text-center space-y-4">
                 <div class="h-16 w-16 bg-yellow-100 rounded-full flex items-center justify-center group-hover:bg-yellow-200 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                 </div>
@@ -51,12 +66,12 @@
             </div>
         </a>
 
-        <!-- Change Password Card -->
+        @* Merk: Peker til Home/PasswordChange. Sjekk at dette stemmer med din routing *@
         <a asp-controller="Home" asp-action="PasswordChange"
            class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
             <div class="flex flex-col items-center text-center space-y-4">
                 <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.104 0 2-.896 2-2s-.896-2-2-2-2 .896-2 2 .896 2 2 2zm0 0v2m0 4h.01M17 21H7a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2z" />
                     </svg>
                 </div>
@@ -73,7 +88,7 @@
            class="block bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
             <div class="flex flex-row items-center justify-center space-x-6">
                 <div class="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center group-hover:bg-gray-200 transition shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
                 </div>

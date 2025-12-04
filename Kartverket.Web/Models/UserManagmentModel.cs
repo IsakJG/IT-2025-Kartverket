@@ -1,13 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Kartverket.Web.Models
 {
-    // Renamed to avoid duplicate type definitions.
+    /// <summary>
+    /// ViewModel for listing users in the administration interface.
+    /// Designed as a lightweight DTO for read-only tables.
+    /// </summary>
     public class UserListViewModel
     {
+        [Display(Name = "User ID")]
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string UserName { get; set; }
-        public string Role { get; set; }
+
+        [Display(Name = "Full Name")]
+        public string Name { get; set; } = string.Empty;
+
+        [Display(Name = "Username")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Display(Name = "Role")]
+        public string Role { get; set; } = string.Empty;
     }
 }

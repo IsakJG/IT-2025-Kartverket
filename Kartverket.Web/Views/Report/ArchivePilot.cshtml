@@ -1,14 +1,27 @@
 @model IEnumerable<Kartverket.Web.Models.ArchiveRow>
 
+@* ---------------------------------------------------------------------------
+    View: My Reports (Pilot Archive)
+    Role: Pilot
+    Description: 
+        Viser historikk over rapporter innsendt av innlogget pilot.
+        Inneholder søk og sortering på klientsiden.
+        
+    ARCHITECTURAL NOTE:
+        Client-side filtering is used here for immediate UI responsiveness.
+        For larger datasets, Server-side pagination (Skip/Take) is recommended.
+    --------------------------------------------------------------------------- 
+*@
+
 @{
     ViewData["Title"] = "My Reports";
 }
 
 <section class="mx-auto max-w-6xl pt-10 px-4">
     
-    <!-- Logo and Title on same line -->
     <div class="flex items-center justify-center gap-4 mb-8">
-        <img src="~/images/KartverketLogo.svg"
+        @* Url.Content sikrer robust bildesti *@
+        <img src="@Url.Content("~/images/KartverketLogo.svg")"
              alt="Kartverket"
              class="h-16 w-auto" />
         <h1 class="text-4xl font-medium text-gray-900">
@@ -16,14 +29,15 @@
         </h1>
     </div>
 
-    <!-- Search Bar -->
     <div class="mb-6 max-w-2xl mx-auto">
+        <label for="searchInput" class="sr-only">Search my reports</label>
         <div class="relative">
             <input type="text" 
                    id="searchInput" 
                    placeholder="Search by Report ID, Title, Status, Category..." 
                    class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-transparent shadow-sm" />
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
         </div>
@@ -32,7 +46,7 @@
     @if (!Model.Any())
     {
         <div class="bg-white shadow-md rounded-2xl p-12 border border-gray-200 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <p class="text-gray-600 text-lg">No reports found.</p>
@@ -41,46 +55,31 @@
     }
     else
     {
-        <!-- Table Card -->
         <div class="bg-white shadow-md rounded-2xl border border-gray-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full table-auto divide-y divide-gray-200">
-                    <!-- Column Headers -->
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Report ID
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Title
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Height (ft)
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Date
-                            </th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                Action
-                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="int">Report ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="string">Title</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="string">Status</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="int">Height (ft)</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="date">Date</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
 
-                    <!-- Table Rows -->
                     <tbody class="bg-white divide-y divide-gray-100">
                         @foreach (var report in Model)
                         {
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        #@report.ReportID
+                                        #@report.ReportId
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">@report.Title</div>
+                                    <div class="text-sm font-medium text-gray-900">@(report.Title ?? "Untitled")</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @{
@@ -88,8 +87,8 @@
                                         {
                                             "Approved" => "bg-green-100 text-green-800",
                                             "Rejected" => "bg-red-100 text-red-800",
-                                            "Pending" => "bg-yellow-100 text-yellow-800",
-                                            _ => "bg-gray-100 text-gray-800"
+                                            "Pending"  => "bg-yellow-100 text-yellow-800",
+                                            _          => "bg-gray-100 text-gray-800"
                                         };
                                     }
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @statusClass">
@@ -104,9 +103,10 @@
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                    @* Linker tilbake til Pilotens arkiv-visning (som ofte er samme som Details) *@
                                     <a asp-action="Details"
                                        asp-controller="Report"
-                                       asp-route-id="@report.ReportID"
+                                       asp-route-id="@report.ReportId"
                                        asp-route-returnUrl="@Url.Action("ArchivePilot", "Report")"
                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-green-800 text-white text-xs font-medium hover:bg-green-900 transition-colors">
                                         View
@@ -119,22 +119,20 @@
             </div>
         </div>
         
-        <!-- No Results Message -->
         <div id="noResults" class="hidden mt-6 bg-white shadow-md rounded-2xl p-8 border border-gray-200 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p class="text-gray-600">No reports match your search criteria.</p>
         </div>
 
-        <!-- Report Count -->
         <div class="mt-6 text-center text-sm text-gray-600">
             Showing <span class="font-medium text-gray-900">@Model.Count()</span> of your reports
         </div>
     }
 
-    <!-- Back to Home Button -->
     <div class="mt-8 text-center mb-6">
+        @* Merk: Sender til Home/MainPage. Vurder om denne burde gå til Pilot/MainPage hvis PilotController er hovedkontrolleren. *@
         <a asp-controller="Home" asp-action="MainPage"
            class="inline-flex items-center px-6 py-3 rounded-xl bg-gray-400 hover:bg-gray-500 text-white font-semibold shadow-md hover:shadow-lg transition-all">
             Back to Home
@@ -145,6 +143,10 @@
 
 @section Scripts {
     <script>
+        /**
+         * CLIENT-SIDE SORTING & FILTERING
+         * Duplicate logic from Archive.cshtml to ensure consistency across views.
+         */
         (function () {
             const container = document.querySelector('.overflow-x-auto');
             const table = container?.querySelector('table');
@@ -155,17 +157,17 @@
             if (!thead || !tbody) return;
 
             const headerCells = Array.from(thead.rows[0].cells);
-            const lastCol = headerCells.length - 1; // assume last column = Actions (non-sortable)
+            const lastCol = headerCells.length - 1; 
 
-            // attach indicators and data-sortable to appropriate headers
+            // --- SORTING SETUP ---
             headerCells.forEach((th, i) => {
-                // skip actions column
                 if (i === lastCol) return;
                 th.dataset.sortable = 'true';
                 th.style.cursor = 'pointer';
                 if (!th.querySelector('.sort-indicator')) {
                     const span = document.createElement('span');
-                    span.className = 'sort-indicator ml-1';
+                    span.className = 'sort-indicator ml-1 text-gray-400';
+                    span.innerText = '↕';
                     th.appendChild(span);
                 }
             });
@@ -180,24 +182,11 @@
             const normalize = (val) => {
                 if (!val) return { t: 's', v: '' };
 
-                // coordinates "lat, lon"
-                if (/^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(val)) {
-                    const parts = val.split(',').map(s => parseFloat(s.trim()));
-                    return { t: 'coord', v: parts };
-                }
-
-                // ISO-like date YYYY-MM-DD[ T]HH:mm(:ss)?
-                const dm = val.match(/^\s*(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?\s*$/);
-                if (dm) {
-                    const y = +dm[1], mo = (+dm[2]) - 1, d = +dm[3];
-                    const h = dm[4] ? +dm[4] : 0, mi = dm[5] ? +dm[5] : 0, s = dm[6] ? +dm[6] : 0;
-                    return { t: 'd', v: Date.UTC(y, mo, d, h, mi, s) };
-                }
-                // fallback Date.parse (try replace space with T)
-                const fIso = Date.parse(val.replace(' ', 'T'));
+                // ISO Date
+                const fIso = Date.parse(val);
                 if (!isNaN(fIso)) return { t: 'd', v: fIso };
 
-                // numeric / heights (e.g. "12.3", "12,3", "12 m")
+                // Numeric
                 const numMatch = val.trim().match(/^[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?\d+)?/);
                 if (numMatch) {
                     const n = parseFloat(val.replace(',', '.').replace(/[^\d\.\-eE]/g, ''));
@@ -210,7 +199,11 @@
             const clearIndicators = () => {
                 headerCells.forEach(th => {
                     const ind = th.querySelector('.sort-indicator');
-                    if (ind) ind.textContent = '';
+                    if (ind) {
+                        ind.innerText = '↕';
+                        ind.classList.remove('text-green-800');
+                        ind.classList.add('text-gray-400');
+                    }
                     th.removeAttribute('aria-sort');
                     delete th.dataset.order;
                 });
@@ -222,48 +215,41 @@
                 th.addEventListener('click', () => {
                     const current = th.dataset.order === 'asc' ? 'asc' : th.dataset.order === 'desc' ? 'desc' : null;
                     const order = current === 'asc' ? 'desc' : 'asc';
-                    const rows = Array.from(tbody.rows).map((r, idx) => ({ r, idx }));
+                    
+                    const rows = Array.from(tbody.rows);
 
                     rows.sort((A, B) => {
-                        const a = getCellValue(A.r, colIndex);
-                        const b = getCellValue(B.r, colIndex);
+                        const a = getCellValue(A, colIndex);
+                        const b = getCellValue(B, colIndex);
                         const na = normalize(a);
                         const nb = normalize(b);
                         const dir = order === 'asc' ? 1 : -1;
 
-                        if (na.t === 'coord' && nb.t === 'coord') {
-                            if (na.v[0] !== nb.v[0]) return (na.v[0] - nb.v[0]) * dir;
-                            return (na.v[1] - nb.v[1]) * dir;
-                        }
                         if (na.t === 'n' && nb.t === 'n') return (na.v - nb.v) * dir;
                         if (na.t === 'd' && nb.t === 'd') return (na.v - nb.v) * dir;
 
                         if (na.t !== nb.t) {
-                            const rank = { 'n': 1, 'd': 1, 'coord': 1, 's': 2 };
+                            const rank = { 'n': 1, 'd': 1, 's': 2 };
                             return (rank[na.t] - rank[nb.t]) * dir;
                         }
-
-                        // locale-aware string compare (numeric option helps "file2" vs "file10")
-                        const cmp = na.v.localeCompare(nb.v, undefined, { numeric: true });
-                        if (cmp !== 0) return cmp * dir;
-
-                        // stable fallback: original index
-                        return (A.idx - B.idx);
+                        return na.v.localeCompare(nb.v, undefined, { numeric: true }) * dir;
                     });
 
-                    // re-append rows in new order
-                    rows.forEach(o => tbody.appendChild(o.r));
+                    rows.forEach(r => tbody.appendChild(r));
 
-                    // update indicators
                     clearIndicators();
                     th.dataset.order = order;
                     th.setAttribute('aria-sort', order === 'asc' ? 'ascending' : 'descending');
                     const indicator = th.querySelector('.sort-indicator');
-                    if (indicator) indicator.textContent = order === 'asc' ? '▲' : '▼';
+                    if (indicator) {
+                        indicator.innerText = order === 'asc' ? '▲' : '▼';
+                        indicator.classList.remove('text-gray-400');
+                        indicator.classList.add('text-green-800');
+                    }
                 });
             });
 
-            // ========== SEARCH FUNCTIONALITY ===========
+            // --- SEARCH SETUP ---
             const searchInput = document.getElementById('searchInput');
             const noResultsDiv = document.getElementById('noResults');
             
@@ -274,13 +260,11 @@
                     let visibleCount = 0;
 
                     rows.forEach(row => {
-                        // Get text content from searchable columns (exclude last column - actions)
                         let rowText = '';
                         for (let i = 0; i < row.cells.length - 1; i++) {
                             rowText += row.cells[i].textContent.toLowerCase() + ' ';
                         }
 
-                        // Show/hide row based on search match
                         if (rowText.includes(searchTerm)) {
                             row.style.display = '';
                             visibleCount++;
@@ -289,7 +273,6 @@
                         }
                     });
 
-                    // Show/hide "no results" message
                     if (noResultsDiv) {
                         if (visibleCount === 0 && searchTerm !== '') {
                             noResultsDiv.classList.remove('hidden');

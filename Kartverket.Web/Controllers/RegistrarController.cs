@@ -1,63 +1,97 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Kartverket.Web.Models;
-using MySqlConnector;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Kartverket.Web.Data;
+using Kartverket.Web.Models;
+using Kartverket.Web.Services;
 
-namespace Kartverket.Web.Controllers;
-
-[Authorize(Roles = "Registar")]
-public class RegistrarController : Controller
+namespace Kartverket.Web.Controllers
 {
-    private readonly KartverketDbContext _db;
+    /// <summary>
+    /// Kontroller for brukere med rollen "Registar" (Matrikkelfører).
+    /// </summary>
+    // MERK: Rollenavnet er "Registar" (Legacy naming convention), ikke "Registrar".
+    // Dette må matche nøyaktig med databasens RoleName-kolonne.
+    [Authorize(Roles = "Registar")] 
+    public class RegistrarController : Controller
+    {
+        private readonly KartverketDbContext _db;
+        private readonly ILogger<RegistrarController> _logger;
 
-    public RegistrarController(KartverketDbContext db)
-    {
-        _db = db;
-    }
-    public ActionResult RegisterMetode()
-    {
-        return View("MainPageReg");
-    }
-    public IActionResult PasswordChange()
-    {
-        // Get the current user's ID from session (or authentication)
-        int? userId = HttpContext.Session.GetInt32("UserId");
-        if (userId == null)
+        private const string SessionKeyUserId = "UserId";
+
+        public RegistrarController(KartverketDbContext db, ILogger<RegistrarController> logger)
         {
-            TempData["ErrorMessage"] = "User not logged in.";
-            return RedirectToAction("RegisterMetode");
+            _db = db;
+            _logger = logger;
         }
 
-        var model = new ChangePasswordViewModel { Id = userId.Value };
-        return View(model);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult PasswordChange(ChangePasswordViewModel model)
-    {
-        if (!ModelState.IsValid)
+        /// <summary>
+        /// Hovedsiden for Registar.
+        /// </summary>
+        [HttpGet]
+        public IActionResult RegisterMetode()
         {
+            return View("MainPageReg");
+        }
+
+        /// <summary>
+        /// Viser skjema for endring av passord.
+        /// </summary>
+        [HttpGet]
+        public IActionResult PasswordChange()
+        {
+            int? userId = HttpContext.Session.GetInt32(SessionKeyUserId);
+            
+            if (userId == null)
+            {
+                // Sender bruker tilbake til hovedsiden for rollen hvis sesjon mangler
+                return RedirectToAction(nameof(RegisterMetode));
+            }
+
+            var model = new ChangePasswordViewModel { Id = userId.Value };
             return View(model);
         }
 
-        // Find the user by ID
-        var user = _db.Users.FirstOrDefault(u => u.UserId == model.Id);
-        if (user == null)
+        /// <summary>
+        /// Behandler passordendring.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PasswordChange(ChangePasswordViewModel model)
         {
-            TempData["ErrorMessage"] = "User not found.";
-            return RedirectToAction("RegisterMetode");
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == model.Id);
+                
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "User not found.";
+                    return RedirectToAction(nameof(RegisterMetode));
+                }
+
+                // Hasher passordet før lagring
+                user.PasswordHash = PasswordHasher.HashPassword(model.Password);
+                
+                _db.Users.Update(user);
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Registar (ID: {Id}) endret passordet sitt.", model.Id);
+                TempData["SuccessMessage"] = "Password updated successfully.";
+                
+                return RedirectToAction(nameof(RegisterMetode));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Feil ved passordbytte for bruker {Id}", model.Id);
+                ModelState.AddModelError(string.Empty, "An error occurred.");
+                return View(model);
+            }
         }
-
-        // Update password hash
-        user.PasswordHash = Kartverket.Web.Services.PasswordHasher.HashPassword(model.Password);
-        _db.Users.Update(user);
-        _db.SaveChanges();
-
-        TempData["SuccessMessage"] = "Password updated successfully.";
-        return RedirectToAction("RegisterMetode");
     }
 }

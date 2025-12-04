@@ -1,9 +1,20 @@
 @model Kartverket.Web.Models.CreateOrgViewModel
+
+@* ---------------------------------------------------------------------------
+    View: Create Organization
+    Role: Admin
+    Description: 
+        Skjema for opprettelse av nye organisasjoner.
+        Inneholder validering mot duplikate navn via kontrolleren.
+    ---------------------------------------------------------------------------
+*@
+
 @{
     ViewData["Title"] = "Create Organization";
 }
 
 <style>
+    /* NOTE: Internal styles kept for self-containment in this context. */
     body {
         background: #f5f3f0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -70,6 +81,13 @@
         font-weight: 600;
         margin-bottom: 1rem;
     }
+
+    /* Style for model-level validation errors (e.g. "Organization already exists") */
+    .validation-summary-errors {
+        color: #dc2626;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
 </style>
 
 <div class="admin-page">
@@ -78,7 +96,13 @@
     <div class="form-card">
         <form asp-action="CreateOrganization" method="post">
             
-            <label asp-for="OrgName" class="form-label">Organization Name</label>
+            @* Validation Summary: Fanger opp feilmeldinger fra kontrolleren 
+               som ikke er knyttet til et spesifikt felt (f.eks. duplikater). 
+            *@
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+            @* Label-teksten hentes automatisk fra [Display(Name="...")] i ViewModel *@
+            <label asp-for="OrgName" class="form-label"></label>
             <input asp-for="OrgName" class="form-input" placeholder="e.g. Redningsselskapet" />
             <span asp-validation-for="OrgName" class="text-red-600 text-sm"></span>
 

@@ -1,25 +1,40 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Kartverket.Web.Models
 {
-    public class LoginModel //Setter premisser for log-in
+    /// <summary>
+    /// ViewModel for innlogging.
+    /// Inneholder data og valideringsregler for innloggingsskjemaet.
+    /// </summary>
+    public class LoginModel
     {
-        [Required(ErrorMessage = "Username is required")] //Brukernavn MÅ skrives for å gå videre
-        public string Username { get; set; }
+        /// <summary>
+        /// Brukerens brukernavn.
+        /// </summary>
+        [Required(ErrorMessage = "Brukernavn er påkrevd.")]
+        [Display(Name = "Brukernavn")]
+        public string Username { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Password is required")] // Basicly samme som nevnt ovenfor
-        public string Password { get; set; }
+        /// <summary>
+        /// Brukerens passord.
+        /// </summary>
+        [Required(ErrorMessage = "Passord er påkrevd.")]
+        [DataType(DataType.Password)] // Forteller Viewet at dette skal være et passordfelt (skjult tekst)
+        [Display(Name = "Passord")]
+        public string Password { get; set; } = string.Empty;
     }
 
-    public class User
+    /// <summary>
+    /// En enkel brukerklasse brukt for midlertidig/mock data i AccountController.
+    /// (Navngitt 'MockUser' for å unngå konflikt med database-entiteten 'Kartverket.Web.Models.Entities.User').
+    /// </summary>
+    public class MockUser
     {
-        public string Username { get; set; }
-        public string Password { get; set; } //Hash og salt etterhvert
+        public string Username { get; set; } = string.Empty;
+        
+        // Merk: I produksjon skal passord aldri lagres i klartekst, men som hash.
+        public string Password { get; set; } = string.Empty; 
 
-        public string Role { get; set; }
-
+        public string Role { get; set; } = string.Empty;
     }
-
-
 }

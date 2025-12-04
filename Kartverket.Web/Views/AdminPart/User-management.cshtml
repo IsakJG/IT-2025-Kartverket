@@ -1,12 +1,22 @@
 ﻿@using Kartverket.Web.Models
 @model IEnumerable<UserAdminViewModel>
 
+@* ---------------------------------------------------------------------------
+    View: User Management (Index)
+    Role: Admin
+    Description: 
+        Hovedoversikt over alle brukere i systemet.
+        Inneholder funksjonalitet for å opprette, redigere og slette brukere.
+        Bruker en Modal (popup) for sikker bekreftelse før sletting.
+    ---------------------------------------------------------------------------
+*@
+
 @{
     ViewData["Title"] = "Admin User Management";
 }
 
 <style>
-    /* Page */
+    /* NOTE: Internal styles preserved for visual consistency as requested. */
     body {
         background: #f5f3f0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -232,7 +242,8 @@
 <div class="admin-page">
     <div class="kv-header">
         <div class="kv-brand">
-            <img src="~/images/KartverketLogo.svg" alt="Kartverket" />
+            @* Url.Content sikrer at bildet lastes riktig selv om appen kjører i en undermappe *@
+            <img src="@Url.Content("~/images/KartverketLogo.svg")" alt="Kartverket" />
             <span class="kv-title">Kartverket</span>
         </div>
     </div>
@@ -265,6 +276,7 @@
         {
             <div class="user-card">
                 <div class="user-main">
+                    @* aria-hidden="true" skjuler avatar-sirkelen for skjermlesere (Accessibility) *@
                     <div class="user-avatar" aria-hidden="true"></div>
 
                     <div class="user-text">
@@ -281,6 +293,7 @@
                 <div class="user-actions">
                     <a asp-action="Edit" asp-route-id="@user.Id" class="btn-edit">Edit</a>
                     
+                    @* Kaller JavaScript-funksjonen for å åpne modalen *@
                     <button type="button" onclick="confirmDelete(@user.Id, '@user.UserName')" class="btn-delete">Delete</button>
                 </div>
             </div>
@@ -292,13 +305,16 @@
     }
 </div>
 
+@* DELETE CONFIRMATION MODAL *@
 <div id="deleteModal" class="modal">
     <div class="modal-content">
         <h3 style="margin-bottom: 16px;">Confirm Deletion</h3>
         <p style="margin-bottom: 20px;">Are you sure you want to delete user <strong id="userToDelete"></strong>? This action cannot be undone.</p>
         <div style="display: flex; gap: 8px; justify-content: flex-end;">
             <button type="button" onclick="closeModal()" class="btn-cancel">Cancel</button>
+            
             <form id="deleteForm" method="post" asp-action="Delete">
+                @* Sikkerhet: AntiForgeryToken er kritisk her siden vi poster data *@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" id="deleteUserId" />
                 <button type="submit" class="btn-delete">Delete</button>
@@ -308,6 +324,7 @@
 </div>
 
 <script>
+    // JavaScript Logic for Modal handling
     function confirmDelete(userId, userName) {
         document.getElementById('userToDelete').textContent = userName;
         document.getElementById('deleteUserId').value = userId;
@@ -318,7 +335,7 @@
         document.getElementById('deleteModal').style.display = 'none';
     }
 
-    // Close modal when clicking outside
+    // Close modal when clicking outside of it
     window.onclick = function(event) {
         const modal = document.getElementById('deleteModal');
         if (event.target === modal) {
@@ -326,7 +343,7 @@
         }
     }
 
-    // Auto-close success messages after 5 seconds
+    // Auto-close success messages after 5 seconds for better UX
     document.addEventListener('DOMContentLoaded', function() {
         const successMessage = document.querySelector('.alert-success');
         if (successMessage) {

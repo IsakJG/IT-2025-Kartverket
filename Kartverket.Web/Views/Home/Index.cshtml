@@ -1,4 +1,11 @@
-@model string
+@* ---------------------------------------------------------------------------
+    View: Home/Index (Landing Page)
+    Description: 
+        Offentlig forside som møter brukeren før innlogging.
+        Fungerer som inngangsport til applikasjonen.
+    ---------------------------------------------------------------------------
+*@
+
 @{
     ViewData["Title"] = "Kartverket";
 }
@@ -6,14 +13,13 @@
 <section class="mx-auto max-w-sm pt-10">
     <div class="text-center space-y-6">
 
-        <!-- Logo -->
         <div class="flex justify-center">
-            <img src="~/images/KartverketLogo.svg"
+            @* Url.Content sikrer korrekt sti uavhengig av deployment-miljø *@
+            <img src="@Url.Content("~/images/KartverketLogo.svg")"
                  alt="Kartverket"
                  class="h-20 w-auto" />
         </div>
 
-        <!-- Title -->
         <div class="space-y-1">
             <h1 class="text-5xl font-medium tracking-wide text-gray-900">
                 WELCOME TO
@@ -23,14 +29,13 @@
             </h2>
         </div>
 
-        <!-- Subtitle -->
         <p class="text-gray-700 text-2xl">
             Register aviation obstacles<br />and manage reports securely.
         </p>
 
-        <!-- Sign in button -->
         <div class="pt-4">
-            <a asp-action="LogIn" asp-controller="Auth"
+            @* Matcher Action-navnet i AuthController nøyaktig (Login, ikke LogIn) *@
+            <a asp-action="Login" asp-controller="Auth"
                class="block w-full px-8 py-6 text-xl font-semibold tracking-wide text-white bg-green-800 rounded-full hover:bg-green-900 transition">
                 SIGN IN
             </a>

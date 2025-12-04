@@ -1,9 +1,21 @@
 @model IEnumerable<Kartverket.Web.Models.OrganizationListViewModel>
+
+@* ---------------------------------------------------------------------------
+    View: Manage Organizations
+    Role: Admin
+    Description: 
+        Liste over alle organisasjoner.
+        Inneholder logikk for å beskytte referanseintegritet:
+        Sletteknappen deaktiveres visuelt hvis organisasjonen har tilknyttede brukere (UserCount > 0).
+    ---------------------------------------------------------------------------
+*@
+
 @{
     ViewData["Title"] = "Manage Organizations";
 }
 
 <style>
+    /* NOTE: Internal styles preserved for specific view context */
     body { background: #f5f3f0; font-family: system-ui, sans-serif; }
     .admin-page { max-width: 800px; margin: 20px auto; padding: 0 16px; }
     
@@ -24,8 +36,8 @@
         font-weight: 500; transition: all 0.2s;
     }
     .btn-delete:disabled {
-        background: #f3f4f6; /* Veldig lys grå */
-        color: #9ca3af; /* Grå tekst */
+        background: #f3f4f6;
+        color: #9ca3af;
         cursor: not-allowed;
         border: 1px solid #e5e7eb;
     }
@@ -49,9 +61,8 @@
 
     .header-actions { margin-bottom: 20px; }
 
-    /* NYE STILER FOR STATUS-MELDINGER */
     .status-locked {
-        color: #b91c1c; /* Rødlig tekst */
+        color: #b91c1c;
         font-size: 0.85rem;
         background-color: #fef2f2;
         padding: 4px 8px;
@@ -64,7 +75,7 @@
     }
     
     .status-open {
-        color: #059669; /* Grønn tekst */
+        color: #059669;
         font-size: 0.85rem;
         margin-top: 4px;
     }
@@ -74,8 +85,15 @@
     <h1 style="font-size: 2rem; font-weight: 600;">Organizations</h1>
     <p style="color: #666; margin-bottom: 20px;">Manage organizations available in the system</p>
 
-    @if (TempData["SuccessMessage"] != null) { <div class="alert-success">@TempData["SuccessMessage"]</div> }
-    @if (TempData["ErrorMessage"] != null) { <div class="alert-error">@TempData["ErrorMessage"]</div> }
+    @* Feedback messages from TempData (Success/Error) *@
+    @if (TempData["SuccessMessage"] != null) 
+    { 
+        <div class="alert-success">@TempData["SuccessMessage"]</div> 
+    }
+    @if (TempData["ErrorMessage"] != null) 
+    { 
+        <div class="alert-error">@TempData["ErrorMessage"]</div> 
+    }
 
     <div class="header-actions">
         <a asp-action="CreateOrganization" class="btn-create">+ Create New Organization</a>
@@ -88,10 +106,11 @@
             <div>
                 <strong style="font-size: 1.1rem; display: block;">@org.OrgName</strong>
                 
+                @* Business Logic: Vis lås-ikon hvis organisasjonen har brukere *@
                 @if (org.UserCount > 0)
                 {
                     <div class="status-locked">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <span>Contains @org.UserCount users (Cannot delete)</span>
@@ -108,9 +127,10 @@
             <form asp-action="DeleteOrganization" method="post" onsubmit="return confirm('Are you sure you want to delete this organization?');">
                 <input type="hidden" name="id" value="@org.OrgId" />
                 
+                @* Business Logic: Deaktiver sletteknappen hvis organisasjonen har brukere for å beskytte dataintegritet *@
                 @if (org.UserCount > 0)
                 {
-                    <button type="button" class="btn-delete" disabled>Delete</button>
+                    <button type="button" class="btn-delete" disabled title="Cannot delete organization with active users">Delete</button>
                 }
                 else
                 {
