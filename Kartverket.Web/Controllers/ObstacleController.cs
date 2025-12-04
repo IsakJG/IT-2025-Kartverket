@@ -72,8 +72,38 @@ public class ObstacleController : Controller
                 using var doc = JsonDocument.Parse(report.GeoLocation);
                 var root = doc.RootElement;
                 
-                // Hvis GeoJSON er et enkelt objekt (ikke FeatureCollection)
-                if (root.ValueKind == JsonValueKind.Object)
+                // Sjekker om det er en FeatureCollection (fra Leaflet Draw)
+                if (root.TryGetProperty("type", out var typeProperty) && 
+                    typeProperty.GetString() == "FeatureCollection")
+                {
+                    if (root.TryGetProperty("features", out var features) && 
+                        features.GetArrayLength() > 0)
+                    {
+                        var firstFeature = features[0];
+                        if (firstFeature.TryGetProperty("geometry", out var geometry))
+                        {
+                            var geometryType = geometry.GetProperty("type").GetString();
+                            var coordinates = geometry.GetProperty("coordinates");
+
+                            if (geometryType == "Point")
+                            {
+                                // Point: [lng, lat]
+                                model.Longitude = coordinates[0].GetDouble();
+                                model.Latitude = coordinates[1].GetDouble();
+                            }
+                            else if (geometryType == "LineString")
+                            {
+                                // LineString: [[lng1, lat1], [lng2, lat2], ...]
+                                // Bruker første punkt som senterpunkt
+                                var firstPoint = coordinates[0];
+                                model.Longitude = firstPoint[0].GetDouble();
+                                model.Latitude = firstPoint[1].GetDouble();
+                            }
+                        }
+                    }
+                }
+                // Fallback for enkle objekter (gamle drafts)
+                else if (root.ValueKind == JsonValueKind.Object)
                 {
                     if (root.TryGetProperty("lat", out var latProp)) 
                         model.Latitude = latProp.GetDouble();
@@ -82,7 +112,10 @@ public class ObstacleController : Controller
                         model.Longitude = lngProp.GetDouble();
                 }
             }
-            catch { }
+            catch 
+            { 
+                // Hvis parsing feiler, bruk default verdier
+            }
         }
 
         // Gjenbruker DataForm-viewet, men med data fylt inn
