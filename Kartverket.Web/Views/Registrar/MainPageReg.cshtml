@@ -15,7 +15,7 @@
     var username = Context.Session.GetString("Username") ?? "Registar";
 }
 
-<section class="mx-auto max-w-4xl pt-10">
+<section class="mx-auto max-w-4xl pt-10 px-4">
     
     <div class="flex justify-center mb-6">
         @* Url.Content sikrer at bildestien fungerer uavhengig av om appen kjører i rot eller undermappe *@
@@ -64,7 +64,7 @@
         </a>
         
         <a asp-controller="Registrar" asp-action="PasswordChange"
-           class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group">
+           class="bg-white shadow-md rounded-2xl p-8 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all group md:col-span-2 md:max-w-sm md:mx-auto md:w-full">
             <div class="flex flex-col items-center text-center space-y-4">
                 <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition">
                     <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
