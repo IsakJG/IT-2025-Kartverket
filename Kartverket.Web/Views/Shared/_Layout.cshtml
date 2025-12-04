@@ -12,19 +12,10 @@
     }
     <meta name="csrf-token" content="@tokens?.RequestToken" />
 
-    <!-- Dark Mode Script (must run before page renders to prevent FOUC) -->
+    <!-- Dark Mode Script - NO PERSISTENCE -->
     <script>
-        // Initialize to light mode by default - only enable dark if explicitly saved
-        if (localStorage.theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            // Ensure we start in light mode (remove any dark class)
-            document.documentElement.classList.remove('dark');
-            // Set light mode as default if nothing is saved
-            if (!localStorage.theme) {
-                localStorage.theme = 'light';
-            }
-        }
+        // Always start in light mode - don't save preference
+        document.documentElement.classList.remove('dark');
     </script>
 
     <!-- Tailwind -->
@@ -269,7 +260,7 @@
 
     <!-- Scripts -->
     <script>
-        // Dark mode toggle functionality
+        // Dark mode toggle functionality - NO PERSISTENCE
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', () => {
@@ -278,11 +269,10 @@
                 
                 if (isDark) {
                     html.classList.remove('dark');
-                    localStorage.theme = 'light';
                 } else {
                     html.classList.add('dark');
-                    localStorage.theme = 'dark';
                 }
+                // REMOVED: localStorage saving - preference is not saved
             });
         }
 
