@@ -49,13 +49,60 @@
                 <dd class="text-base text-gray-900">@Model.ObstacleHeight feet</dd>
             </div>
 
-            <!-- Location -->
+          <!-- Location -->
             <div class="flex items-start py-3 border-b border-gray-200">
                 <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Location</dt>
                 <dd class="text-sm text-gray-900 font-mono">
-                    @Model.Latitude.ToString("F6"), @Model.Longitude.ToString("F6")
-                </dd>
-            </div>
+
+        @{
+            // Startpunkt (lagres allerede i databasen)
+            string startLat = Model.Latitude.ToString("F6");
+            string startLng = Model.Longitude.ToString("F6");
+
+            // Sluttpunkt for linje (null hvis ikke linje)
+            string? endLat = null;
+            string? endLng = null;
+
+            // Hvis GeoJSON finnes → prøv å lese sluttpunkt fra LineString
+            if (!string.IsNullOrEmpty(Model.GeometryGeoJson))
+            {
+                try
+                {
+                    var geo = System.Text.Json.JsonDocument.Parse(Model.GeometryGeoJson);
+
+                    if (geo.RootElement.TryGetProperty("features", out var features))
+                    {
+                        var geom = features[0].GetProperty("geometry");
+                        var type = geom.GetProperty("type").GetString();
+
+                        if (type == "LineString")
+                        {
+                            var coords = geom.GetProperty("coordinates");
+                            var last = coords[coords.GetArrayLength() - 1];
+
+                            // GeoJSON = [lng, lat]
+                            endLat = last[1].GetDouble().ToString("F6");
+                            endLng = last[0].GetDouble().ToString("F6");
+                        }
+                    }
+                }
+                catch { /* Hvis parsing feiler → viser bare startpunkt */ }
+            }
+        }
+
+        @* Hvis ikke linje: vis kun startpunkt *@
+        @if (endLat == null)
+        {
+            @($"{startLat}, {startLng}")
+        }
+        else
+        {
+            @($"{startLat}, {startLng} → {endLat}, {endLng}")
+        }
+
+    </dd>
+</div>
+
 
             <!-- Description -->
             <div class="flex items-start py-3">
@@ -99,7 +146,7 @@
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '� OpenStreetMap contributors'
+            attribution: '� OpenStreetMap contributors'
         }).addTo(map);
 
         @if (!string.IsNullOrEmpty(Model.GeometryGeoJson))

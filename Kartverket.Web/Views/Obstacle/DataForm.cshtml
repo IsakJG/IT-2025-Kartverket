@@ -216,28 +216,40 @@
             hasSavedData = false; 
         });
 
-        map.on(L.Draw.Event.CREATED, function (e) {
-            drawnItems.clearLayers(); 
-            drawnItems.addLayer(e.layer);
-            
-            // Stopp automatisk GPS-sporing hvis brukeren tegner manuelt
-            map.stopLocate(); 
+            map.on(L.Draw.Event.CREATED, function (e) {
+                drawnItems.clearLayers();
+                drawnItems.addLayer(e.layer);
 
-            var center;
-            if (e.layerType === 'marker') center = e.layer.getLatLng();
-            else if (e.layerType === 'polyline') {
-                var latlngs = e.layer.getLatLngs();
-                center = latlngs[0]; 
-            }
-            
-            if (center) {
-                updateHiddenFieldsAndDisplay(center);
-            }
-            
-            // Lagre GeoJSON
-            var geoData = drawnItems.toGeoJSON();
-            document.getElementById('GeometryGeoJson').value = JSON.stringify(geoData);
-        });
+        // Stopp automatisk GPS-sporing hvis brukeren tegner manuelt
+        map.stopLocate();
+
+        if (e.layerType === 'marker') {
+            var p = e.layer.getLatLng();
+            updateHiddenFieldsAndDisplay(p);
+        }
+        else if (e.layerType === 'polyline') {
+            var latlngs = e.layer.getLatLngs();
+            var start = latlngs[0];
+            var end = latlngs[latlngs.length - 1];
+
+            // Bruker startpunkt som hovedposisjon 
+            updateHiddenFieldsAndDisplay(start);
+
+            // Vis start → slutt i UI
+            document.getElementById('latDisplay').innerText =
+                start.lat.toFixed(6) + " → " + end.lat.toFixed(6);
+
+            document.getElementById('lngDisplay').innerText =
+                start.lng.toFixed(6) + " → " + end.lng.toFixed(6);
+
+            document.getElementById('selectedLocation').classList.remove('hidden');
+        }
+
+        // Lagre hele linjen / punktet som GeoJSON (backend trenger dette)
+        var geoData = drawnItems.toGeoJSON();
+        document.getElementById('GeometryGeoJson').value = JSON.stringify(geoData);
+    });
+
 
         // Hjelpefunksjoner
         function updateHiddenFieldsAndDisplay(latlng) {
@@ -254,15 +266,27 @@
         }
 
         function updateCoordinateDisplay(layer) {
-            var center;
-            if (layer instanceof L.Marker) center = layer.getLatLng();
-            else if (layer instanceof L.Polyline) center = layer.getLatLngs()[0];
+            if (layer instanceof L.Marker) {
+                var p = layer.getLatLng();
 
-            if (center) {
-                document.getElementById('latDisplay').innerText = center.lat.toFixed(6);
-                document.getElementById('lngDisplay').innerText = center.lng.toFixed(6);
-            }
-        }
+            document.getElementById('latDisplay').innerText = p.lat.toFixed(6);
+            document.getElementById('lngDisplay').innerText = p.lng.toFixed(6);
+    }
+    else if (layer instanceof L.Polyline) {
+        var latlngs = layer.getLatLngs();
+        var start = latlngs[0];
+        var end = latlngs[latlngs.length - 1];
+
+        document.getElementById('latDisplay').innerText =
+            start.lat.toFixed(6) + " → " + end.lat.toFixed(6);
+
+        document.getElementById('lngDisplay').innerText =
+            start.lng.toFixed(6) + " → " + end.lng.toFixed(6);
+    }
+
+    document.getElementById('selectedLocation').classList.remove('hidden');
+}
+
 
         // Sikkerhetsnett ved submit
         document.querySelector('form').addEventListener('submit', function (e) {
