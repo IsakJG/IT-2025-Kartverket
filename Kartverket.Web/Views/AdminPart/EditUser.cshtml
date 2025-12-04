@@ -106,6 +106,27 @@
         margin-bottom: 15px;
         font-weight: 500;
     }
+    
+    .password-wrapper {
+        position: relative;
+        margin-bottom: 10px;
+    }
+    
+    .password-toggle-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        color: #666;
+    }
+    
+    .password-toggle-btn:hover {
+        color: #333;
+    }
 </style>
 
 <div class="admin-page">
@@ -140,7 +161,29 @@
             <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
 
             <label asp-for="Password" class="form-label"></label>
-            <input asp-for="Password" class="form-input" placeholder="Leave blank to keep current password" />
+            <div class="password-wrapper">
+                <input asp-for="Password" 
+                       id="passwordInput"
+                       type="password"
+                       class="form-input" 
+                       style="padding-right: 40px;"
+                       placeholder="Leave blank to keep current password" />
+                
+                <button type="button"
+                        id="togglePassword"
+                        class="password-toggle-btn"
+                        aria-label="Toggle password visibility">
+                    <svg id="eyeIconShow" style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5C5.63636 5 2 12 2 12C2 12 5.63636 19 12 19C18.3636 19 22 12 22 12C22 12 18.3636 5 12 5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg id="eyeIconHide" style="width: 20px; height: 20px; display: none;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 3L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10.5 10.5C10.1872 10.8128 9.99451 11.2346 9.99451 11.675C9.99451 12.1154 10.1872 12.5372 10.5 12.85C10.8128 13.1628 11.2346 13.3555 11.675 13.3555C12.1154 13.3555 12.5372 13.1628 12.85 12.85" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9.5 5.62C10.3137 5.37801 11.1555 5.25553 12 5.25C18.3636 5.25 22 12.25 22 12.25C21.4796 13.1797 20.8917 14.0676 20.24 14.9075M6.5 6.5C4.26667 8.13333 2 12.25 2 12.25C2 12.25 5.63636 19.25 12 19.25C13.8988 19.25 15.5036 18.5571 16.9375 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
             <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
 
             <label asp-for="RoleId" class="form-label"></label>
@@ -166,4 +209,24 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const eyeIconShow = document.getElementById('eyeIconShow');
+        const eyeIconHide = document.getElementById('eyeIconHide');
+
+        togglePassword.addEventListener('click', function() {
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            if (isPassword) {
+                eyeIconShow.style.display = 'none';
+                eyeIconHide.style.display = 'block';
+            } else {
+                eyeIconShow.style.display = 'block';
+                eyeIconHide.style.display = 'none';
+            }
+        });
+    </script>
 }
