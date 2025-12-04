@@ -12,9 +12,8 @@
     }
     <meta name="csrf-token" content="@tokens?.RequestToken" />
 
-    <!-- Dark Mode Script - NO PERSISTENCE -->
     <script>
-        // Always start in light mode - don't save preference
+        //  Start in light mode 
         document.documentElement.classList.remove('dark');
     </script>
 
@@ -117,20 +116,6 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <!-- Dark Mode Toggle Button -->
-                    <button id="themeToggle"
-                            class="rounded-md p-2 ring-1 ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            aria-label="Toggle dark mode">
-                        <!-- Sun icon (visible in dark mode) -->
-                        <svg class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <!-- Moon icon (visible in light mode) -->
-                        <svg class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                    </button>
-
                     <!-- Mobile menu button -->
                     <button id="navToggle"
                             class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden"
@@ -190,6 +175,24 @@
                                 </button>
                             </form>
                         </li>
+
+                        <!-- Dark Mode Toggle Button - Samme stil som Home/Logout -->
+                        <li>
+                            <button id="themeToggle"
+                                    class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400 text-left w-full flex items-center gap-2"
+                                    aria-label="Toggle dark mode">
+                                <!-- Sun icon (visible in dark mode) -->
+                                <svg class="h-5 w-5 hidden dark:inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <!-- Moon icon (visible in light mode) -->
+                                <svg class="h-5 w-5 inline-block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                                <span class="dark:hidden">Dark Mode</span>
+                                <span class="hidden dark:inline">Light Mode</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             }
@@ -202,18 +205,20 @@
                         Kartverket.Web
                     </a>
                     
-                    <!-- Dark Mode Toggle Button -->
+                    <!-- Dark Mode Toggle Button - Samme stil som innlogget versjon -->
                     <button id="themeToggle"
-                            class="rounded-md p-2 ring-1 ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            class="rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400 flex items-center gap-2 transition-colors"
                             aria-label="Toggle dark mode">
                         <!-- Sun icon (visible in dark mode) -->
-                        <svg class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 hidden dark:inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         <!-- Moon icon (visible in light mode) -->
-                        <svg class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 inline-block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
+                        <span class="dark:hidden">Dark Mode</span>
+                        <span class="hidden dark:inline">Light Mode</span>
                     </button>
                 </div>
             }
@@ -259,20 +264,29 @@
 
 
     <!-- Scripts -->
+    <!-- Dark mode toggle functionality - SERVER-SIDE PERSISTENCE -->
     <script>
-        // Dark mode toggle functionality - NO PERSISTENCE
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', () => {
                 const html = document.documentElement;
                 const isDark = html.classList.contains('dark');
                 
+                // Toggle dark mode class
                 if (isDark) {
                     html.classList.remove('dark');
                 } else {
                     html.classList.add('dark');
                 }
-                // REMOVED: localStorage saving - preference is not saved
+                
+                // Save preference to server session via AJAX
+                fetch('/Home/SetDarkMode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isDarkMode: !isDark })
+                });
             });
         }
 
@@ -312,5 +326,16 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
+    <script>
+        // Initialize dark mode from server session
+        @if (Context.Session.GetString("DarkMode") == "true")
+        {
+            <text>document.documentElement.classList.add('dark');</text>
+        }
+        else
+        {
+            <text>document.documentElement.classList.remove('dark');</text>
+        }
+    </script>
 </body>
 </html>
