@@ -63,13 +63,13 @@ namespace Kartverket.Web.Controllers
                 // Validering: Sjekk om brukernavn eller e-post allerede finnes
                 if (await _context.Users.AnyAsync(u => u.Username == model.Username))
                 {
-                    ModelState.AddModelError(nameof(RegisterViewModel.Username), "Brukernavn er allerede i bruk.");
+                    ModelState.AddModelError(nameof(RegisterViewModel.Username), "Username is already taken. ");
                     return View(model);
                 }
 
                 if (await _context.Users.AnyAsync(u => u.Email == model.Email))
                 {
-                    ModelState.AddModelError(nameof(RegisterViewModel.Email), "E-post er allerede i bruk.");
+                    ModelState.AddModelError(nameof(RegisterViewModel.Email), "Email is already used. ");
                     return View(model);
                 }
 
@@ -104,13 +104,13 @@ namespace Kartverket.Web.Controllers
 
                 _logger.LogInformation("Ny bruker registrert: {Username} (ID: {UserId}).", user.Username, user.UserId);
                 
-                TempData["SuccessMessage"] = "Bruker registrert vellykket! Du kan nå logge inn.";
+                TempData["SuccessMessage"] = "  Registration successful! You can now log in.";
                 return RedirectToAction(nameof(Login));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Kritisk feil under registrering av bruker {Username}.", model.Username);
-                ModelState.AddModelError(string.Empty, "En uventet feil oppstod. Vennligst prøv igjen senere.");
+                ModelState.AddModelError(string.Empty, "Could not register user due to a technical error.");
                 return View(model);
             }
         }
@@ -169,12 +169,12 @@ namespace Kartverket.Web.Controllers
                 }
 
                 _logger.LogWarning("Mislykket innlogging for bruker: {Username}", model.Username);
-                ModelState.AddModelError(string.Empty, "Feil brukernavn eller passord.");
+                ModelState.AddModelError(string.Empty, "Wrong username or password.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Databasefeil under innlogging for {Username}", model.Username);
-                ModelState.AddModelError(string.Empty, "Det oppstod en teknisk feil. Prøv igjen senere.");
+                ModelState.AddModelError(string.Empty, "Could not log in due to a technical error.");
             }
 
             return View(model);
@@ -191,7 +191,7 @@ namespace Kartverket.Web.Controllers
             
             _logger.LogInformation("Bruker logget ut: {Username}", username ?? "Ukjent");
             
-            TempData["SuccessMessage"] = "Du er nå logget ut.";
+            TempData["SuccessMessage"] = "You have been logged out successfully.";
             return RedirectToAction("Index", "Home");
         }
 

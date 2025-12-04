@@ -118,6 +118,8 @@ public class ObstacleController : Controller
         {
             // Slapp validering for utkast (tillater lagring av uferdige data)
             ModelState.Clear();
+             if (string.IsNullOrWhiteSpace(model.ObstacleName)) 
+                ModelState.AddModelError(nameof(model.ObstacleName), "Name is required.");
         }
 
         if (!ModelState.IsValid)

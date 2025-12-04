@@ -8,33 +8,33 @@ namespace Kartverket.Web.Models
     /// </summary>
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Brukernavn er påkrevd.")]
-        [StringLength(50, ErrorMessage = "Brukernavn kan ikke være lengre enn 50 tegn.")]
-        [Display(Name = "Brukernavn")]
+        [Required(ErrorMessage = "Username is required.")]
+        [StringLength(50, ErrorMessage = "Username cannot be longer than 50 characters.")]
+        [Display(Name = "Username")]
         public string Username { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "E-post er påkrevd.")]
-        [EmailAddress(ErrorMessage = "Vennligst oppgi en gyldig e-postadresse.")]
-        [Display(Name = "E-post")]
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Please provide a valid email address.")]
+        [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Passord er påkrevd.")]
-        // StringLength er mer konsist enn MinLength/MaxLength
-        [StringLength(100, MinimumLength = 8, ErrorMessage = "Passordet må være mellom 8 og 100 tegn.")]
+        [Required(ErrorMessage = "Password is required.")]
+        // StringLength is more concise than MinLength/MaxLength
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 100 characters.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Passord")]
+        [Display(Name = "Password")]
         public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Du må bekrefte passordet.")]
-        // nameof(Password) sikrer at koden tåler refaktorering (endring av variabelnavn)
-        [Compare(nameof(Password), ErrorMessage = "Passordene er ikke like.")]
+        [Required(ErrorMessage = "You must confirm the password.")]
+        // nameof(Password) ensures the code tolerates refactoring (variable name changes)
+        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Bekreft passord")]
+        [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Du må velge en organisasjon.")]
-        [Display(Name = "Organisasjon")]
-        // Nullable int sikrer at brukeren aktivt må velge i listen (hindrer default 0)
+        [Required(ErrorMessage = "You must choose an organization.")]
+        [Display(Name = "Organisasjo")]
+        // Nullable int ensures the user actively chooses from the list (prevents default 0)
         public int? OrgId { get; set; } 
     }
 }
