@@ -1,0 +1,290 @@
+﻿/* ==============================================
+   GLOBAL DARK MODE STYLES
+   ============================================== */
+
+/* Override inline styles and provide dark mode defaults */
+html.dark body {
+    background: #111827 !important; /* dark gray-900 */
+    color: #f3f4f6 !important; /* light gray-100 */
+}
+
+/* FIX: Target the dark square header area specifically */
+html.dark .kv-header {
+    background: transparent !important;
+}
+
+/* White backgrounds to dark */
+html.dark .bg-white,
+html.dark [style*="background: #ffffff"],
+html.dark [style*="background-color: #fff"],
+html.dark [style*="background: #fff"],
+html.dark .user-card,
+html.dark .form-card,
+html.dark .modal-content {
+    background: #1f2937 !important; /* gray-800 */
+    color: #f3f4f6 !important;
+}
+
+/* Light gray backgrounds to darker - KRITISK FIX */
+html.dark .admin-page {
+    background: transparent !important; /* Gjør containeren transparent slik at body-bakgrunnen vises gjennom */
+}
+
+/* Fix for the weird dark square - Target the card/section containers */
+html.dark .bg-white.shadow-md,
+html.dark .bg-white.rounded-2xl {
+    background: #1f2937 !important; /* gray-800 */
+}
+
+/* Borders */
+html.dark .user-card,
+html.dark .form-card,
+html.dark .modal-content,
+html.dark [style*="border: 1px solid #e2e2e2"],
+html.dark [style*="border: 1px solid #ccc"] {
+    border-color: #374151 !important; /* gray-700 */
+}
+
+/* Text colors */
+html.dark .kv-title,
+html.dark .admin-heading,
+html.dark .user-text strong,
+html.dark h1, html.dark h2, html.dark h3,
+html.dark [style*="color: #333"] {
+    color: #f3f4f6 !important; /* gray-100 */
+}
+
+html.dark .admin-subtitle,
+html.dark .user-meta,
+html.dark [style*="color: #555"],
+html.dark .form-label,
+html.dark label {
+    color: #9ca3af !important; /* gray-400 */
+}
+
+/* Fix for labels with uppercase text */
+html.dark label.uppercase,
+html.dark .uppercase {
+    color: #9ca3af !important; /* gray-400 */
+}
+
+/* Form inputs - FIX for white input backgrounds */
+html.dark .form-input,
+html.dark input[type="text"],
+html.dark input[type="number"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark select,
+html.dark textarea {
+    background: #374151 !important; /* gray-700 */
+    border-color: #4b5563 !important; /* gray-600 */
+    color: #f3f4f6 !important;
+}
+
+/* Target Tailwind input classes specifically */
+html.dark input.border-gray-300,
+html.dark textarea.border-gray-300 {
+    background: #374151 !important; /* gray-700 */
+    border-color: #4b5563 !important; /* gray-600 */
+    color: #f3f4f6 !important;
+}
+
+html.dark input.rounded-xl,
+html.dark textarea.rounded-xl {
+    background: #374151 !important; /* gray-700 */
+    border-color: #4b5563 !important; /* gray-600 */
+    color: #f3f4f6 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #6b7280 !important; /* gray-500 */
+}
+
+/* Focus states for inputs */
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+    background: #374151 !important;
+    border-color: #10b981 !important; /* Keep green focus ring */
+    color: #f3f4f6 !important;
+}
+
+/* Buttons - preserve green/red colors but adjust for dark mode */
+html.dark .btn-create,
+html.dark .btn-submit,
+html.dark .btn-edit {
+    background: #047857 !important; /* darker green */
+}
+
+html.dark .btn-create:hover,
+html.dark .btn-submit:hover,
+html.dark .btn-edit:hover {
+    background: #059669 !important;
+}
+
+html.dark .btn-delete {
+    background: #dc2626 !important; /* keep red */
+}
+
+html.dark .btn-delete:hover {
+    background: #ef4444 !important;
+}
+
+html.dark .btn-cancel {
+    background: #374151 !important; /* gray-700 */
+    border-color: #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+
+html.dark .btn-cancel:hover {
+    background: #4b5563 !important;
+}
+
+/* Tailwind button classes */
+html.dark .bg-green-600 {
+    background: #047857 !important;
+}
+
+html.dark .bg-green-600:hover,
+html.dark .hover\:bg-green-700:hover {
+    background: #059669 !important;
+}
+
+html.dark .bg-gray-400 {
+    background: #4b5563 !important;
+}
+
+html.dark .bg-gray-400:hover,
+html.dark .hover\:bg-gray-500:hover {
+    background: #6b7280 !important;
+}
+
+/* Avatar backgrounds */
+html.dark .user-avatar {
+    background: #4b5563 !important; /* gray-600 */
+}
+
+/* Alert messages - keep color coding but adjust */
+html.dark .alert-success {
+    background: #064e3b !important; /* dark green-900 */
+    border-color: #065f46 !important;
+    color: #d1fae5 !important;
+}
+
+html.dark .alert-error {
+    background: #7f1d1d !important; /* dark red-900 */
+    border-color: #991b1b !important;
+    color: #fee2e2 !important;
+}
+
+/* Modal overlay */
+html.dark .modal {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Index/Login page specific */
+html.dark .bg-gray-50 {
+    background: #1f2937 !important; /* gray-800 */
+}
+
+html.dark .text-gray-900 {
+    color: #f3f4f6 !important;
+}
+
+html.dark .text-gray-700 {
+    color: #d1d5db !important;
+}
+
+html.dark .text-gray-600 {
+    color: #9ca3af !important;
+}
+
+html.dark .text-gray-800 {
+    color: #e5e7eb !important;
+}
+
+html.dark .border-gray-200 {
+    border-color: #374151 !important;
+}
+
+html.dark .border-gray-300 {
+    border-color: #4b5563 !important;
+}
+
+html.dark .border-b.border-gray-200 {
+    border-color: #374151 !important;
+}
+
+/* Dropdown select specific styling */
+html.dark select option {
+    background: #374151 !important;
+    color: #f3f4f6 !important;
+}
+
+/* SVG icons in dark mode */
+html.dark svg.text-gray-700 {
+    color: #d1d5db !important;
+}
+
+/* Card sections - fix for "Select Location" and similar cards */
+html.dark .shadow-md.rounded-2xl {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+/* Map container */
+html.dark #map {
+    border-color: #4b5563 !important;
+}
+
+/* Selected location display box */
+html.dark .bg-gray-50.rounded-xl {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
+}
+
+/* Drawing tool buttons */
+html.dark .bg-blue-600 {
+    background: #1e40af !important;
+}
+
+html.dark .bg-blue-600:hover,
+html.dark .hover\:bg-blue-700:hover {
+    background: #1e3a8a !important;
+}
+
+html.dark .bg-green-600 {
+    background: #047857 !important;
+}
+
+html.dark .bg-gray-600 {
+    background: #4b5563 !important;
+}
+
+html.dark .bg-gray-600:hover,
+html.dark .hover\:bg-gray-700:hover {
+    background: #374151 !important;
+}
+
+/* Details page text colors */
+html.dark dd.text-gray-900 {
+    color: #f3f4f6 !important;
+}
+
+html.dark dd.text-gray-700 {
+    color: #d1d5db !important;
+}
+
+html.dark dt.text-gray-600 {
+    color: #9ca3af !important;
+}
+
+/* Admin page headings that might be missing */
+html.dark .admin-heading {
+    color: #f3f4f6 !important;
+}
+
+html.dark .admin-subtitle {
+    color: #9ca3af !important;
+}

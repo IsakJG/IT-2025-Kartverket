@@ -45,6 +45,16 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }); 
     }
 
+    [HttpPost]
+    public IActionResult SetDarkMode([FromBody] DarkModeRequest request)
+    {
+        HttpContext.Session.SetString("DarkMode", request.IsDarkMode.ToString().ToLower());
+        return Ok();
+    }
+
+    public class DarkModeRequest
+    {
+        public bool IsDarkMode { get; set; }
     public IActionResult PasswordChange() 
     {
         // Get the current user's ID from session (or authentication)

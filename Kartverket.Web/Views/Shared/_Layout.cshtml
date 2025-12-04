@@ -12,10 +12,16 @@
     }
     <meta name="csrf-token" content="@tokens?.RequestToken" />
 
+    <script>
+        //  Start in light mode 
+        document.documentElement.classList.remove('dark');
+    </script>
+
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script> 
     <script>
         tailwind.config = {
+          darkMode: 'class', // Enable manual dark mode with class selector
           theme: {
             extend: {
               container: { center: true, padding: { DEFAULT: '1rem', md: '1.5rem' } }
@@ -65,9 +71,10 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Darkmode.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Kartverket.Web.styles.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen flex flex-col bg-gray-50 text-gray-900"> 
+<body class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"> 
     <!-- CSRF Token hidden field for form submissions -->
     @Html.AntiForgeryToken()
 
@@ -77,125 +84,152 @@
         var userRoles = Context.Session.GetString("UserRoles")?.Split(',') ?? Array.Empty<string>();
         var username = Context.Session.GetString("Username") ?? "";
     }
-    @if (isLoggedIn)
-    {
-        <header class="border-b bg-white">
-            <nav class="container flex items-center justify-between py-3">
-                @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
-                {
-                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
-                       asp-controller="Registrar" asp-action="RegisterMetode">
-                        Kartverket.Web
-                    </a>
-                }
-                else if (userRoles.Contains("Admin"))
-                {
-                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
-                       asp-controller="AdminPart" asp-action="Index">
-                        Kartverket.Web
-                    </a>
-                }
-                else
-                {
-                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 transition-colors"
-                       asp-area="" asp-controller="Home" asp-action="MainPage">
-                        Kartverket.Web
-                    </a>
-                }
+    
+    <!-- Always show header with dark mode toggle -->
+    <header class="border-b bg-white dark:bg-gray-800 dark:border-gray-700">
+        <nav class="container flex items-center justify-between py-3">
+            @if (isLoggedIn)
+            {
+                <!-- Logged in layout -->
+                <div class="flex items-center gap-4">
+                    @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                    {
+                        <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                           asp-controller="Registrar" asp-action="RegisterMetode">
+                            Kartverket.Web
+                        </a>
+                    }
+                    else if (userRoles.Contains("Admin"))
+                    {
+                        <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                           asp-controller="AdminPart" asp-action="Index">
+                            Kartverket.Web
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                           asp-area="" asp-controller="Home" asp-action="MainPage">
+                            Kartverket.Web
+                        </a>
+                    }
+                </div>
 
-
-
-
-
-                <!-- Mobile menu button -->
-                <button id="navToggle"
-                        class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 hover:bg-gray-100 md:hidden"
-                        aria-controls="primaryNav"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+                <div class="flex items-center gap-3">
+                    <!-- Mobile menu button -->
+                    <button id="navToggle"
+                            class="inline-flex items-center justify-center rounded-md p-2 ring-1 ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden"
+                            aria-controls="primaryNav"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
 
                 <!-- Links -->
                 <div id="primaryNav"
                      class="hidden w-full md:w-auto md:flex md:items-center md:gap-6">
                     <ul class="mt-3 flex flex-col gap-2 md:mt-0 md:flex-row md:items-center">                    
                         <!-- Dynamiske lenker basert på innlogging og roller -->
-                        @if (isLoggedIn)
-                        {
-                            <!-- Logged in user menu -->
-                            <li class="flex items-center gap-2">
-                                <span class="block rounded-md px-3 py-2 text-gray-700 font-medium">
-                                    Logged in as: @username
-                                </span>
-                            </li>
+                        <!-- Logged in user menu -->
+                        <li class="flex items-center gap-2">
+                            <span class="block rounded-md px-3 py-2 text-gray-700 dark:text-gray-300 font-medium">
+                                Logged in as: @username
+                            </span>
+                        </li>
 
-                            <li>
+                        <li>
+                            @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
+                            {
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400"
+                                   asp-controller="Registrar" asp-action="RegisterMetode">
+                                    Home
+                                </a>
+                            }
+                            else if (userRoles.Contains("Admin"))
+                            {
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400"
+                                   asp-controller="AdminPart" asp-action="Index">
+                                    Home
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400"
+                                   asp-controller="Home" asp-action="MainPage">
+                                    Home
+                                </a>
+                            }
+                        </li>
+                    
+                        <!-- Logout for alle innloggede -->
+                        <li>
+                            <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" 
+                                        class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400 text-left w-full">
+                                    Log out
+                                </button>
+                            </form>
+                        </li>
 
-                                @if (isLoggedIn)
-                                {
-                                    @if (userRoles.Contains("Registrar") || userRoles.Contains("Registar"))
-                                    {
-                                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                           asp-controller="Registrar" asp-action="RegisterMetode">
-                                            Home
-                                        </a>
-                                    }
-                                    else if (userRoles.Contains("Admin"))
-                                    {
-                                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                           asp-controller="AdminPart" asp-action="Index">
-                                            Home
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                           asp-controller="Home" asp-action="MainPage">
-                                            Home
-                                        </a>
-                                    }
-                                }
-                            </li>
-
-                        
-                            <!-- Logout for alle innloggede -->
-                            <li>
-                                <form asp-controller="Auth" asp-action="Logout" method="post" class="inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" 
-                                            class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700 text-left w-full">
-                                        Log out
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <!-- Not logged in menu -->
-                            <li>
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Auth" asp-action="Login">Logg Inn</a>
-                            </li>
-                            <li>
-                                <a class="block rounded-md px-3 py-2 hover:bg-gray-100 hover:text-indigo-700"
-                                   asp-controller="Auth" asp-action="Register">Registrer</a>
-                            </li>
-                        }
+                        <!-- Dark Mode Toggle Button - Samme stil som Home/Logout -->
+                        <li>
+                            <button id="themeToggle"
+                                    class="block rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400 text-left w-full flex items-center gap-2"
+                                    aria-label="Toggle dark mode">
+                                <!-- Sun icon (visible in dark mode) -->
+                                <svg class="h-5 w-5 hidden dark:inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <!-- Moon icon (visible in light mode) -->
+                                <svg class="h-5 w-5 inline-block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                                <span class="dark:hidden">Dark Mode</span>
+                                <span class="hidden dark:inline">Light Mode</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
-            </nav>
-        </header>
-     }
+            }
+            else
+            {
+                <!-- Not logged in layout - Simple header with just brand and dark mode toggle -->
+                <div class="flex items-center justify-between w-full">
+                    <a class="text-lg font-semibold tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                       asp-controller="Home" asp-action="Index">
+                        Kartverket.Web
+                    </a>
+                    
+                    <!-- Dark Mode Toggle Button - Samme stil som innlogget versjon -->
+                    <button id="themeToggle"
+                            class="rounded-md px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-700 dark:hover:text-indigo-400 flex items-center gap-2 transition-colors"
+                            aria-label="Toggle dark mode">
+                        <!-- Sun icon (visible in dark mode) -->
+                        <svg class="h-5 w-5 hidden dark:inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <!-- Moon icon (visible in light mode) -->
+                        <svg class="h-5 w-5 inline-block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        <span class="dark:hidden">Dark Mode</span>
+                        <span class="hidden dark:inline">Light Mode</span>
+                    </button>
+                </div>
+            }
+        </nav>
+    </header>
 
     <!-- Success/Error Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="container mt-4">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            <div class="bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 px-4 py-3 rounded">
                 @TempData["SuccessMessage"]
             </div>
         </div>
@@ -204,7 +238,7 @@
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="container mt-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div class="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 px-4 py-3 rounded">
                 @TempData["ErrorMessage"]
             </div>
         </div>
@@ -218,11 +252,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="border-t bg-white text-sm text-gray-600">
+    <footer class="border-t bg-white dark:bg-gray-800 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400">
         <div class="container py-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; 2025 - Kartverket.Web</p>
             <p>
-                <a class="text-indigo-700 hover:underline"
+                <a class="text-indigo-700 dark:text-indigo-400 hover:underline"
                    asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
             </p>
         </div>
@@ -230,7 +264,32 @@
 
 
     <!-- Scripts -->
+    <!-- Dark mode toggle functionality - SERVER-SIDE PERSISTENCE -->
     <script>
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const html = document.documentElement;
+                const isDark = html.classList.contains('dark');
+                
+                // Toggle dark mode class
+                if (isDark) {
+                    html.classList.remove('dark');
+                } else {
+                    html.classList.add('dark');
+                }
+                
+                // Save preference to server session via AJAX
+                fetch('/Home/SetDarkMode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ isDarkMode: !isDark })
+                });
+            });
+        }
+
         // Mobile nav toggle
         const navToggle = document.getElementById('navToggle');
         const primaryNav = document.getElementById('primaryNav');
@@ -267,5 +326,16 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
+    <script>
+        // Initialize dark mode from server session
+        @if (Context.Session.GetString("DarkMode") == "true")
+        {
+            <text>document.documentElement.classList.add('dark');</text>
+        }
+        else
+        {
+            <text>document.documentElement.classList.remove('dark');</text>
+        }
+    </script>
 </body>
 </html>
