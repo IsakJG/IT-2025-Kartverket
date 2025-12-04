@@ -8,6 +8,11 @@ html.dark body {
     color: #f3f4f6 !important; /* light gray-100 */
 }
 
+/* FIX: Target the dark square header area specifically */
+html.dark .kv-header {
+    background: transparent !important;
+}
+
 /* White backgrounds to dark */
 html.dark .bg-white,
 html.dark [style*="background: #ffffff"],
@@ -20,10 +25,9 @@ html.dark .modal-content {
     color: #f3f4f6 !important;
 }
 
-/* Light gray backgrounds to darker */
-html.dark [style*="background: #f5f3f0"],
+/* Light gray backgrounds to darker - KRITISK FIX */
 html.dark .admin-page {
-    background: #111827 !important; /* gray-900 */
+    background: transparent !important; /* Gjør containeren transparent slik at body-bakgrunnen vises gjennom */
 }
 
 /* Fix for the weird dark square - Target the card/section containers */
