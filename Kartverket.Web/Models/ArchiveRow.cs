@@ -52,5 +52,6 @@ namespace Kartverket.Web.Models
         /// Rådata for kartvisning (GeoJSON).
         /// </summary>
         public string? GeometryGeoJson { get; set; }
+        public string PositionText { get; set; }
     }
 }
