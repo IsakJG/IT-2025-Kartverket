@@ -174,7 +174,9 @@ public class ObstacleController : Controller
                 // Fallback: Lagre enkel markørposisjon hvis ingen tegning finnes
                 report.GeoLocation = JsonSerializer.Serialize(new { lat = model.Latitude, lng = model.Longitude });
             }
-
+            // Oppdater modellens Latitude/Longitude fra faktisk GeoLocation,
+            // slik at Overview-siden får riktig startpunkt (ikke 0,0).
+            ExtractCoordinatesFromJson(report.GeoLocation, model);
             // --- 4. Sett Status og Lagre ---
             if (action == ActionDraft)
             {
@@ -260,28 +262,94 @@ public class ObstacleController : Controller
     /// <summary>
     /// Forsøker å hente ut lat/lng fra en JSON-streng for å populere modellen.
     /// </summary>
-    private void ExtractCoordinatesFromJson(string json, ObstacleData model)
-    {
-        if (string.IsNullOrEmpty(json)) return;
+    private void ExtractCoordinatesFromJson(string? json, ObstacleData model)
+{
+    if (string.IsNullOrWhiteSpace(json)) return;
 
-        try
+    try
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        if (root.ValueKind != JsonValueKind.Object)
+            return;
+
+        // CASE 1: Enkel JSON: { "lat": X, "lng": Y }
+        if (root.TryGetProperty("lat", out var latProp) &&
+            root.TryGetProperty("lng", out var lngProp) &&
+            latProp.ValueKind == JsonValueKind.Number &&
+            lngProp.ValueKind == JsonValueKind.Number)
         {
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            
-            if (root.ValueKind == JsonValueKind.Object)
+            model.Latitude = latProp.GetDouble();
+            model.Longitude = lngProp.GetDouble();
+            return;
+        }
+
+        // CASE 2: FeatureCollection -> gå ned til geometry
+        if (root.TryGetProperty("type", out var typeProp) &&
+            typeProp.ValueKind == JsonValueKind.String &&
+            typeProp.GetString() == "FeatureCollection" &&
+            root.TryGetProperty("features", out var featuresProp) &&
+            featuresProp.ValueKind == JsonValueKind.Array)
+        {
+            var firstFeature = featuresProp.EnumerateArray().FirstOrDefault();
+            if (firstFeature.ValueKind == JsonValueKind.Object &&
+                firstFeature.TryGetProperty("geometry", out var geometryProp) &&
+                geometryProp.ValueKind == JsonValueKind.Object)
             {
-                if (root.TryGetProperty("lat", out var latProp) && latProp.ValueKind == JsonValueKind.Number) 
-                    model.Latitude = latProp.GetDouble();
-                
-                if (root.TryGetProperty("lng", out var lngProp) && lngProp.ValueKind == JsonValueKind.Number) 
-                    model.Longitude = lngProp.GetDouble();
+                root = geometryProp;
             }
         }
-        catch (JsonException ex)
+
+        // CASE 3: GeoJSON Point eller LineString
+        if (!root.TryGetProperty("type", out var geomTypeProp) ||
+            geomTypeProp.ValueKind != JsonValueKind.String ||
+            !root.TryGetProperty("coordinates", out var coordsProp) ||
+            coordsProp.ValueKind != JsonValueKind.Array)
         {
-            // Vi logger bare warning her, da dette ikke skal stoppe brukeren fra å redigere skjemaet
-            _logger.LogWarning(ex, "Kunne ikke parse GeoJSON for rapport {ReportId}", model.ReportId);
+            return;
+        }
+
+        var geomType = geomTypeProp.GetString();
+
+        if (geomType == "Point")
+        {
+            // coordinates: [lon, lat]
+            var coords = coordsProp.EnumerateArray().ToList();
+            if (coords.Count >= 2 &&
+                coords[0].ValueKind == JsonValueKind.Number &&
+                coords[1].ValueKind == JsonValueKind.Number)
+            {
+                var lng = coords[0].GetDouble();
+                var lat = coords[1].GetDouble();
+
+                model.Latitude = lat;
+                model.Longitude = lng;
+            }
+        }
+        else if (geomType == "LineString")
+        {
+            // coordinates: [[lon, lat], [lon, lat], ...]
+            var all = coordsProp.EnumerateArray().ToList();
+            if (all.Count >= 1)
+            {
+                var first = all[0].EnumerateArray().ToList();
+                if (first.Count >= 2 &&
+                    first[0].ValueKind == JsonValueKind.Number &&
+                    first[1].ValueKind == JsonValueKind.Number)
+                {
+                    var lng = first[0].GetDouble();
+                    var lat = first[1].GetDouble();
+
+                    model.Latitude = lat;
+                    model.Longitude = lng;
+                }
+            }
         }
     }
+    catch (JsonException ex)
+    {
+        _logger.LogWarning(ex, "Kunne ikke parse GeoJSON for rapport {ReportId}", model.ReportId);
+    }
+}
 }

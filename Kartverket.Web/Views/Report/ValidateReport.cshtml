@@ -79,7 +79,14 @@
                 <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Height</dt>
                 <dd class="text-base text-gray-900">@Model.HeightInFeet feet</dd>
             </div>
-
+            <div class="flex items-start py-3 border-b border-gray-200">
+            <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">
+                 Position
+            </dt>
+            <dd class="text-base text-gray-900">
+                 @(ViewBag.PositionText ?? "N/A")
+            </dd>
+            </div>
             <div class="flex items-start py-3 border-b border-gray-200">
                 <dt class="text-sm font-bold text-gray-600 uppercase tracking-wider w-40 flex-shrink-0">Status</dt>
                 <dd>

@@ -87,6 +87,12 @@ namespace Kartverket.Web.Controllers
                 .FirstOrDefaultAsync(r => r.ReportId == reportId);
 
             if (report == null) return NotFound();
+            var (positionText, lat, lng) = ParsePosition(report.GeoLocation);
+
+    // Sender verdiene videre via ViewBag (enkelt siden modellen er Report)
+    ViewBag.PositionText = positionText;
+    ViewBag.Latitude     = lat;
+    ViewBag.Longitude    = lng;
             
             return View(report);
         }
@@ -189,11 +195,18 @@ namespace Kartverket.Web.Controllers
                 .Include(rep => rep.Status)
                 .Include(rep => rep.Category)
                 .Include(rep => rep.TimestampEntry)
+            
                 .FirstOrDefaultAsync(rep => rep.ReportId == id);
 
             if (r == null) return NotFound();
 
             var row = MapToArchiveRow(r);
+
+            var (positionText, lat, lng) = ParsePosition(r.GeoLocation);
+
+            row.PositionText = positionText;
+            row.Latitude     = lat;
+            row.Longitude    = lng;
             // Inkluderer full GeoJSON for Details-visning
             row.GeometryGeoJson = r.GeoLocation; 
 
@@ -207,7 +220,7 @@ namespace Kartverket.Web.Controllers
         /// </summary>
         private ArchiveRow MapToArchiveRow(Kartverket.Web.Models.Entities.Report r)
         {
-            var (lat, lng) = ParseGeoLocation(r.GeoLocation);
+            var (positionText, lat, lng) = ParsePosition(r.GeoLocation);
 
             return new ArchiveRow
             {
@@ -222,7 +235,8 @@ namespace Kartverket.Web.Controllers
                 Longitude    = lng,
                 AssignedAt   = r.AssignedAt,
                 DecisionAt   = r.DecisionAt,
-                CreatedAt    = r.TimestampEntry?.DateCreated
+                CreatedAt    = r.TimestampEntry?.DateCreated,
+                PositionText = positionText
             };
         }
 
@@ -259,5 +273,139 @@ namespace Kartverket.Web.Controllers
                 return (null, null);
             }
         }
+
+        private (string display, double? lat, double? lng) ParsePosition(string? json)
+{
+    if (string.IsNullOrWhiteSpace(json))
+        return ("N/A", null, null);
+
+    try
+    {
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        // ---------- CASE 1: Enkel JSON: { "lat": X, "lng": Y } ----------
+        if (root.ValueKind == JsonValueKind.Object &&
+            root.TryGetProperty("lat", out var latProp) &&
+            root.TryGetProperty("lng", out var lngProp))
+        {
+            if (TryReadDouble(latProp, out var latVal) &&
+                TryReadDouble(lngProp, out var lngVal))
+            {
+                return ($"{latVal:F5}, {lngVal:F5}", latVal, lngVal);
+            }
+        }
+
+        // ---------- CASE 2: FeatureCollection → gå ned til geometry ----------
+        if (root.ValueKind == JsonValueKind.Object &&
+            root.TryGetProperty("type", out var typeProp) &&
+            typeProp.ValueKind == JsonValueKind.String &&
+            typeProp.GetString() == "FeatureCollection" &&
+            root.TryGetProperty("features", out var featuresProp) &&
+            featuresProp.ValueKind == JsonValueKind.Array)
+        {
+            var firstFeature = featuresProp.EnumerateArray().FirstOrDefault();
+            if (firstFeature.ValueKind == JsonValueKind.Object &&
+                firstFeature.TryGetProperty("geometry", out var geometryProp) &&
+                geometryProp.ValueKind == JsonValueKind.Object)
+            {
+                root = geometryProp;
+            }
+        }
+
+        // ---------- CASE 3: GeoJSON Point ----------
+        if (root.ValueKind == JsonValueKind.Object &&
+            root.TryGetProperty("type", out var geomTypeProp) &&
+            geomTypeProp.ValueKind == JsonValueKind.String &&
+            geomTypeProp.GetString() == "Point" &&
+            root.TryGetProperty("coordinates", out var pointCoords) &&
+            pointCoords.ValueKind == JsonValueKind.Array)
+        {
+            var values = pointCoords.EnumerateArray().ToList();
+            if (values.Count >= 2 &&
+                values[0].ValueKind == JsonValueKind.Number &&
+                values[1].ValueKind == JsonValueKind.Number)
+            {
+                // GeoJSON: [lon, lat]
+                var lngVal = values[0].GetDouble();
+                var latVal = values[1].GetDouble();
+
+                return ($"{latVal:F5}, {lngVal:F5}", latVal, lngVal);
+            }
+        }
+
+        // ---------- CASE 4: GeoJSON LineString (start → slutt) ----------
+        if (root.ValueKind == JsonValueKind.Object &&
+            root.TryGetProperty("type", out var lineTypeProp) &&
+            lineTypeProp.ValueKind == JsonValueKind.String &&
+            lineTypeProp.GetString() == "LineString" &&
+            root.TryGetProperty("coordinates", out var coords) &&
+            coords.ValueKind == JsonValueKind.Array)
+        {
+            var list = coords.EnumerateArray().ToList();
+
+            if (list.Count >= 1)
+            {
+                // Startpunkt
+                var first = list.First().EnumerateArray().ToList();
+                if (first.Count >= 2 &&
+                    first[0].ValueKind == JsonValueKind.Number &&
+                    first[1].ValueKind == JsonValueKind.Number)
+                {
+                    var sLng = first[0].GetDouble();
+                    var sLat = first[1].GetDouble();
+
+                    // Hvis vi har sluttpunkt → vis med pil
+                    if (list.Count >= 2)
+                    {
+                        var last = list.Last().EnumerateArray().ToList();
+                        if (last.Count >= 2 &&
+                            last[0].ValueKind == JsonValueKind.Number &&
+                            last[1].ValueKind == JsonValueKind.Number)
+                        {
+                            var eLng = last[0].GetDouble();
+                            var eLat = last[1].GetDouble();
+
+                            string display = $"{sLat:F5}, {sLng:F5} → {eLat:F5}, {eLng:F5}";
+                            return (display, sLat, sLng);
+                        }
+                    }
+
+                    // Hvis bare ett punkt i linjen → behandle som punkt
+                    return ($"{sLat:F5}, {sLng:F5}", sLat, sLng);
+                }
+            }
+        }
+
+        // Ingenting traff → ingen gyldig posisjon
+        return ("N/A", null, null);
+    }
+    catch
+    {
+        return ("N/A", null, null);
+    }
+
+    // Lokal hjelpemetode for å tolke tall som både number og string
+    static bool TryReadDouble(JsonElement element, out double value)
+    {
+        if (element.ValueKind == JsonValueKind.Number)
+        {
+            value = element.GetDouble();
+            return true;
+        }
+
+        if (element.ValueKind == JsonValueKind.String &&
+            double.TryParse(element.GetString(), System.Globalization.NumberStyles.Any,
+                            System.Globalization.CultureInfo.InvariantCulture, out var parsed))
+        {
+            value = parsed;
+            return true;
+        }
+
+        value = 0;
+        return false;
+    }
+}
+
     }
 }
