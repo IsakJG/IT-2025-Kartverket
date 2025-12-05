@@ -25,6 +25,13 @@ html.dark .modal-content {
     color: #f3f4f6 !important;
 }
 
+/* Organization cards - NYTT */
+html.dark .org-card {
+    background: #1f2937 !important; /* gray-800 */
+    color: #f3f4f6 !important;
+    border-color: #374151 !important;
+}
+
 /* Light gray backgrounds to darker - KRITISK FIX */
 html.dark .admin-page {
     background: transparent !important; /* Gjør containeren transparent slik at body-bakgrunnen vises gjennom */
@@ -40,6 +47,7 @@ html.dark .bg-white.rounded-2xl {
 html.dark .user-card,
 html.dark .form-card,
 html.dark .modal-content,
+html.dark .org-card,
 html.dark [style*="border: 1px solid #e2e2e2"],
 html.dark [style*="border: 1px solid #ccc"] {
     border-color: #374151 !important; /* gray-700 */
@@ -66,6 +74,22 @@ html.dark label {
 html.dark label.uppercase,
 html.dark .uppercase {
     color: #9ca3af !important; /* gray-400 */
+}
+
+/* Organization page specific - NYTT */
+html.dark .status-locked {
+    background: #7f1d1d !important; /* dark red-900 */
+    color: #fca5a5 !important;
+}
+
+html.dark .status-open {
+    color: #6ee7b7 !important;
+}
+
+html.dark .btn-delete:disabled {
+    background: #4b5563 !important;
+    color: #6b7280 !important;
+    border: 1px solid #6b7280 !important;
 }
 
 /* Form inputs - FIX for white input backgrounds */
@@ -123,6 +147,15 @@ html.dark .btn-edit:hover {
     background: #059669 !important;
 }
 
+html.dark .btn-create-secondary {
+    background: #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+
+html.dark .btn-create-secondary:hover {
+    background: #6b7280 !important;
+}
+
 html.dark .btn-delete {
     background: #dc2626 !important; /* keep red */
 }
@@ -139,6 +172,15 @@ html.dark .btn-cancel {
 
 html.dark .btn-cancel:hover {
     background: #4b5563 !important;
+}
+
+html.dark .btn-back {
+    background: #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+
+html.dark .btn-back:hover {
+    background: #6b7280 !important;
 }
 
 /* Tailwind button classes */
@@ -287,4 +329,104 @@ html.dark .admin-heading {
 
 html.dark .admin-subtitle {
     color: #9ca3af !important;
+}
+
+/* ===================================================
+   ARCHIVE/REPORT TABLE FIXES - CRITICAL FOR ARCHIVEPILOT
+   =================================================== */
+
+/* Table header background */
+html.dark thead.bg-gray-50 {
+    background: #1f2937 !important; /* dark gray-800 */
+}
+
+/* Table header text */
+html.dark thead th.text-gray-600 {
+    color: #9ca3af !important; /* gray-400 */
+}
+
+/* Table body background (base table rows) */
+html.dark tbody.bg-white {
+    background: #111827 !important; /* dark gray-900 */
+}
+
+/* Table row hover - FIX FOR WHITE HOVER */
+html.dark tbody tr.hover\:bg-gray-50:hover,
+html.dark tr.hover\:bg-gray-50:hover {
+    background: #1f2937 !important; /* gray-800 instead of white */
+}
+
+/* Table cell text colors */
+html.dark td.text-gray-900,
+html.dark td .text-gray-900 {
+    color: #f3f4f6 !important;
+}
+
+html.dark td.text-gray-700,
+html.dark td .text-gray-700 {
+    color: #d1d5db !important;
+}
+
+html.dark td.text-gray-800 {
+    color: #e5e7eb !important;
+}
+
+/* Table dividers */
+html.dark .divide-y.divide-gray-200 > * + *,
+html.dark .divide-y.divide-gray-100 > * + * {
+    border-color: #374151 !important;
+}
+
+/* Badge backgrounds in table */
+html.dark .bg-gray-100 {
+    background: #374151 !important;
+    color: #e5e7eb !important;
+}
+
+html.dark .text-gray-800 {
+    color: #e5e7eb !important;
+}
+
+/* Status badges - preserve color coding */
+html.dark .bg-green-100 {
+    background: #064e3b !important;
+}
+
+html.dark .text-green-800 {
+    color: #6ee7b7 !important;
+}
+
+html.dark .bg-yellow-100 {
+    background: #78350f !important;
+}
+
+html.dark .text-yellow-800 {
+    color: #fde047 !important;
+}
+
+html.dark .bg-red-100 {
+    background: #7f1d1d !important;
+}
+
+html.dark .text-red-800 {
+    color: #fca5a5 !important;
+}
+
+/* Green button in table (View button) */
+html.dark .bg-green-800 {
+    background: #047857 !important;
+}
+
+html.dark .bg-green-800:hover,
+html.dark .hover\:bg-green-900:hover {
+    background: #059669 !important;
+}
+
+/* Empty state messages */
+html.dark .text-gray-400 {
+    color: #9ca3af !important;
+}
+
+html.dark .text-gray-500 {
+    color: #6b7280 !important;
 }
