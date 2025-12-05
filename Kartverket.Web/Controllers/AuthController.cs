@@ -2,160 +2,137 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Kartverket.Web.Data;
 using Kartverket.Web.Models;
-using Kartverket.Web.Models.Entities;
 using Kartverket.Web.Services;
+// Alias for å skille mellom ViewModel User og Database Entity User hvis navnene kolliderer
+using UserEntity = Kartverket.Web.Models.Entities.User;
+using UserRoleEntity = Kartverket.Web.Models.Entities.UserRole;
 
 namespace Kartverket.Web.Controllers
 {
+    /// <summary>
+    /// Håndterer autentisering mot databasen, registrering av nye brukere og sesjonshåndtering.
+    /// </summary>
     public class AuthController : Controller
     {
         private readonly KartverketDbContext _context;
         private readonly ILogger<AuthController> _logger;
 
+        // Konstanter for Roller og Session-nøkler (Best Practice for å unngå skrivefeil)
+        private const int DefaultRoleId = 3; // Pilot
+        private const string RoleAdmin = "Admin";
+        private const string RoleRegistrar = "Registar";       
+        private const string SessionKeyUserId = "UserId";
+        private const string SessionKeyUsername = "Username";
+        private const string SessionKeyEmail = "Email";
+        private const string SessionKeyOrg = "Organization";
+        private const string SessionKeyRoles = "UserRoles";
+
+        /// <summary>
+        /// Initialiserer AuthController med databasekontekst og logger.
+        /// </summary>
         public AuthController(KartverketDbContext context, ILogger<AuthController> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        // GET: Registreringsskjema
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        // POST: Behandle registrering
-        [HttpPost]
-        [ValidateAntiForgeryToken] //Legger til beskyttelse mot CSRF på alle POST-forespørsler
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Sjekk om brukernavn eksisterer
-                    if (await _context.Users.AnyAsync(u => u.Username == model.Username))
-                    {
-                        ModelState.AddModelError("Username", "Brukernavn er allerede i bruk");
-                        return View(model);
-                    }
-
-                    // Sjekk om e-post eksisterer
-                    if (await _context.Users.AnyAsync(u => u.Email == model.Email))
-                    {
-                        ModelState.AddModelError("Email", "E-post er allerede i bruk");
-                        return View(model);
-                    }
-
-                    // Finn neste UserId
-                    var maxUserId = await _context.Users.MaxAsync(u => (int?)u.UserId) ?? 0;
-                    var nextUserId = maxUserId + 1;
-
-                    // Lag ny bruker med hashet passord
-                    var user = new Kartverket.Web.Models.Entities.User
-                    {
-                        UserId = nextUserId,
-                        Username = model.Username,
-                        Email = model.Email,
-                        PasswordHash = PasswordHasher.HashPassword(model.Password),
-                        OrgId = model.OrgId,
-                        CreatedAt = DateTime.Now
-                    };
-
-                    // Legg til Pilot-rolle som standard (RoleId = 3)
-                    var userRole = new UserRole
-                    {
-                        UserId = user.UserId,
-                        RoleId = 3 // Pilot
-                    };
-
-                    // Lagre i database
-                    _context.Users.Add(user);
-                    _context.UserRoles.Add(userRole);
-                    await _context.SaveChangesAsync();
-
-                    _logger.LogInformation("Ny bruker registrert: {Username} (ID: {UserId})", user.Username, user.UserId);
-                    
-                    TempData["SuccessMessage"] = "Bruker registrert vellykket! Du kan nå logge inn.";
-                    return RedirectToAction("Login", "Auth");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Feil under registrering av bruker {Username}", model.Username);
-                    ModelState.AddModelError("", "En feil oppstod under registrering. Vennligst prøv igjen.");
-                }
-            }
-
-            return View(model);
-        }
-
-        // GET: Login skjema
+        /// <summary>
+        /// Viser innloggingsskjemaet.
+        /// </summary>
+        [HttpGet]
         public IActionResult Login()
         {
+            // Hvis brukeren allerede er logget inn, send dem til hovedsiden
+            if (HttpContext.Session.GetString(SessionKeyUserId) != null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
-        // POST: Behandle login
+        /// <summary>
+        /// Validerer legitimasjon og oppretter brukersesjon.
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LogIn model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                return View(model);
+            }
+
+            try
+            {
+                // Hent bruker inkludert roller og organisasjon for å minimere antall databasekall senere
+                var user = await _context.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .Include(u => u.Organization)
+                    .FirstOrDefaultAsync(u => u.Username == model.Username);
+
+                // Verifiser passord
+                if (user != null && PasswordHasher.VerifyPassword(model.Password, user.PasswordHash))
                 {
-                    // Finn bruker med roller
-                    var user = await _context.Users
-                        .Include(u => u.UserRoles)
-                        .ThenInclude(ur => ur.Role)
-                        .Include(u => u.Organization)
-                        .FirstOrDefaultAsync(u => u.Username == model.Username);
+                    // Opprett sesjonsdata
+                    HttpContext.Session.SetInt32(SessionKeyUserId, user.UserId);
+                    HttpContext.Session.SetString(SessionKeyUsername, user.Username);
+                    HttpContext.Session.SetString(SessionKeyEmail, user.Email);
+                    HttpContext.Session.SetString(SessionKeyOrg, user.Organization?.OrgName ?? "Ukjent");
+                    
+                    var roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList();
+                    HttpContext.Session.SetString(SessionKeyRoles, string.Join(",", roles));
 
-                    if (user != null && PasswordHasher.VerifyPassword(model.Password, user.PasswordHash))
-                    {
-                        // Login vellykket - lagre session
-                        HttpContext.Session.SetInt32("UserId", user.UserId);
-                        HttpContext.Session.SetString("Username", user.Username);
-                        HttpContext.Session.SetString("Email", user.Email);
-                        HttpContext.Session.SetString("Organization", user.Organization?.OrgName ?? "Ukjent");
-                        
-                        // Lagre roller som komma-separert liste
-                        var roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList();
-                        HttpContext.Session.SetString("UserRoles", string.Join(",", roles));
+                    _logger.LogInformation("Bruker {Username} logget inn. Roller: {Roles}", 
+                        user.Username, string.Join(", ", roles));
 
-                        _logger.LogInformation("Bruker logget inn: {Username} (Roller: {Roles})", 
-                            user.Username, string.Join(", ", roles));
-
-                        // Redirect basert på roller
-                        if (roles.Contains("Admin"))
-                            return RedirectToAction("Index", "AdminPart"); // Endret fra AdminPart, User-mangement, til Index, AdminPart
-                        else if (roles.Contains("Registrar") || roles.Contains("Registar")) 
-                            return RedirectToAction("RegisterMetode", "Registrar");
-                        else
-                            return RedirectToAction("MainPage", "Home");
-                    }
-
-                    ModelState.AddModelError("", "Feil brukernavn eller passord");
+                    return RedirectBasedOnRole(roles);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Feil under login for bruker {Username}", model.Username);
-                    ModelState.AddModelError("", "En feil oppstod under innlogging. Vennligst prøv igjen.");
-                }
+
+                _logger.LogWarning("Mislykket innlogging for bruker: {Username}", model.Username);
+                ModelState.AddModelError(string.Empty, "Wrong username or password.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Databasefeil under innlogging for {Username}", model.Username);
+                ModelState.AddModelError(string.Empty, "Could not log in due to a technical error.");
             }
 
             return View(model);
         }
 
-        // Logout
+        /// <summary>
+        /// Logger ut brukeren og tømmer sesjonen.
+        /// </summary>
         public IActionResult Logout()
         {
-            var username = HttpContext.Session.GetString("Username");
-            HttpContext.Session.Clear();
-            _logger.LogInformation("Bruker logget ut: {Username}", username);
+            var username = HttpContext.Session.GetString(SessionKeyUsername);
             
-            TempData["SuccessMessage"] = "Du er nå logget ut.";
+            HttpContext.Session.Clear(); // Sletter all data i sesjonen
+            
+            _logger.LogInformation("Bruker logget ut: {Username}", username ?? "Ukjent");
+            
+            TempData["SuccessMessage"] = "You have been logged out successfully.";
             return RedirectToAction("Index", "Home");
+        }
+
+        /// <summary>
+        /// Hjelpemetode for å rute brukeren til riktig startside basert på rolle.
+        /// </summary>
+        private IActionResult RedirectBasedOnRole(List<string> roles)
+        {
+            if (roles.Contains(RoleAdmin))
+            {
+                return RedirectToAction("Index", "AdminPart");
+            }
+            
+            if (roles.Contains(RoleRegistrar))
+            {
+                return RedirectToAction("RegisterMetode", "Registrar");
+            }
+
+            // Standard fallback
+            return RedirectToAction("MainPage", "Home");
         }
     }
 }

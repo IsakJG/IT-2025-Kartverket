@@ -1,297 +1,324 @@
 ﻿@using Kartverket.Web.Models
 @model IEnumerable<UserAdminViewModel>
 
+@* ---------------------------------------------------------------------------
+    View: User Management (Index)
+    Role: Admin
+    Description: 
+        Hovedoversikt over alle brukere i systemet.
+        Inneholder funksjonalitet for å opprette, redigere og slette brukere.
+        Bruker en Modal (popup) for sikker bekreftelse før sletting.
+    ---------------------------------------------------------------------------
+*@
+
 @{
     ViewData["Title"] = "Admin User Management";
 }
 
 <style>
-	/* Page */
-	body {
-		background: #f5f3f0;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-	}
+    /* NOTE: Internal styles preserved for visual consistency as requested. */
+    body {
+        background: #f5f3f0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-	.admin-page {
-		max-width: 900px;
-		margin: 10px auto;
-		padding: 0 16px;
-	}
+    .admin-page {
+        max-width: 900px;
+        margin: 10px auto;
+        padding: 0 16px;
+    }
 
-	/* Header / logo */
-	.kv-header {
-		margin-top: -10px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 32px;
-	}
+    /* Header / logo */
+    .kv-header {
+        margin-top: -10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+    }
 
-	.kv-brand {
-		display: flex;
-		gap: 10px;
-		align-items: center;
-	}
+    .kv-brand {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
 
-	.kv-brand img {
-		height: 60px;
-		width: auto;
-	}
+    .kv-brand img {
+        height: 60px;
+        width: auto;
+    }
 
-	.kv-title {
-		font-size: 48px;
-		font-weight: 500;
-	}
+    .kv-title {
+        font-size: 48px;
+        font-weight: 500;
+    }
 
-	/* Page heading */
-	.admin-heading {
-		font-size: 26px;
-		font-weight: 600;
-		margin-bottom: 4px;
-	}
+    /* Page heading */
+    .admin-heading {
+        font-size: 26px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
 
-	.admin-subtitle {
-		color: #555;
-		margin-bottom: 20px;
-	}
+    .admin-subtitle {
+        color: #555;
+        margin-bottom: 20px;
+    }
 
-	/* Create button */
-	.btn-create {
-		background: #007047;
-		color: #fff;
-		border-radius: 8px;
-		padding: 10px 24px;
-		border: none;
-		font-weight: 500;
-		cursor: pointer;
-		display: inline-block;
-		text-decoration: none;
-	}
+    /* Create buttons */
+    .btn-create {
+        background: #007047;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 24px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-block;
+        text-decoration: none;
+    }
 
-	.btn-create:hover {
-		filter: brightness(1.05);
-	}
+    .btn-create:hover {
+        filter: brightness(1.05);
+    }
+    
+    .btn-create-secondary {
+        background: #4b5563;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 24px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-block;
+        text-decoration: none;
+    }
+    .btn-create-secondary:hover {
+        filter: brightness(1.1);
+    }
 
-	/* User cards list */
-	.users-header-row {
-		display: flex;
-		justify-content: flex-end;
-		margin-bottom: 16px;
-	}
+    /* User cards list */
+    .users-header-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
 
-	.user-card {
-		background: #ffffff;
-		border-radius: 12px;
-		padding: 16px 18px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 12px;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-	}
+    .user-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
 
-	.user-main {
-		display: flex;
-		align-items: center;
-		gap: 14px;
-	}
+    .user-main {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
 
-	.user-avatar {
-		width: 44px;
-		height: 44px;
-		border-radius: 50%;
-		background: #e8e8e8;
-	}
 
-	.user-text strong {
-		display: block;
-		margin-bottom: 2px;
-	}
+    .user-text strong {
+        display: block;
+        margin-bottom: 2px;
+    }
 
-	.user-meta {
-		font-size: 14px;
-		color: #555;
-	}
+    .user-meta {
+        font-size: 14px;
+        color: #555;
+    }
 
-	.user-meta span {
-		display: block;
-	}
+    .user-meta span {
+        display: block;
+    }
+    
+    .org-badge {
+        color: #007047; 
+        font-weight: 600;
+    }
 
-	.user-actions {
-		display: flex;
-		gap: 8px;
-		align-items: center;
-	}
+    .user-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
 
-	.btn-edit {
-		background: #007047;
-		color: #fff;
-		border-radius: 8px;
-		padding: 8px 18px;
-		border: none;
-		cursor: pointer;
-		text-decoration: none;
-		font-weight: 500;
-	}
+    .btn-edit {
+        background: #007047;
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 18px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+    }
 
-	.btn-edit:hover {
-		filter: brightness(1.05);
-	}
+    .btn-edit:hover {
+        filter: brightness(1.05);
+    }
 
-	.btn-delete {
-		background: #dc2626;
-		color: #fff;
-		border-radius: 8px;
-		padding: 8px 18px;
-		border: none;
-		cursor: pointer;
-		text-decoration: none;
-		font-weight: 500;
-	}
+    .btn-delete {
+        background: #dc2626;
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 18px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 500;
+    }
 
-	.btn-delete:hover {
-		background: #b91c1c;
-	}
+    .btn-delete:hover {
+        background: #b91c1c;
+    }
 
-	/* Modal styles */
-	.modal {
-		display: none;
-		position: fixed;
-		z-index: 1000;
-		left: 0;
-		top: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0,0,0,0.5);
-	}
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
 
-	.modal-content {
-		background-color: #fefefe;
-		margin: 15% auto;
-		padding: 20px;
-		border-radius: 12px;
-		width: 400px;
-		box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-	}
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 12px;
+        width: 400px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-	.btn-cancel {
-		padding: 8px 16px;
-		border-radius: 8px;
-		border: 1px solid #ccc;
-		text-decoration: none;
-		color: #333;
-		background: #fff;
-		cursor: pointer;
-	}
+    .btn-cancel {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        color: #333;
+        background: #fff;
+        cursor: pointer;
+    }
 
-	.btn-cancel:hover {
-		background: #f5f5f5;
-	}
+    .btn-cancel:hover {
+        background: #f5f5f5;
+    }
 
-	/* Success/Error messages */
-	.alert-success {
-		background: #d1fae5;
-		border: 1px solid #a7f3d0;
-		color: #065f46;
-		padding: 12px 16px;
-		border-radius: 8px;
-		margin-bottom: 16px;
-	}
+    /* Success/Error messages */
+    .alert-success {
+        background: #d1fae5;
+        border: 1px solid #a7f3d0;
+        color: #065f46;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
 
-	.alert-error {
-		background: #fee2e2;
-		border: 1px solid #fecaca;
-		color: #991b1b;
-		padding: 12px 16px;
-		border-radius: 8px;
-		margin-bottom: 16px;
-	}
+    .alert-error {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
 </style>
 
 <div class="admin-page">
-	<!-- Header with logo -->
-	<div class="kv-header">
-		<div class="kv-brand">
-			<img src="~/images/KartverketLogo.svg" alt="Kartverket" />
-			<span class="kv-title">Kartverket</span>
-		</div>
-	</div>
+    <div class="kv-header">
+        <div class="kv-brand">
+            @* Url.Content sikrer at bildet lastes riktig selv om appen kjører i en undermappe *@
+            <img src="@Url.Content("~/images/Kartverketlogo.svg")" alt="Kartverket" />
+            <span class="kv-title">Kartverket</span>
+        </div>
+    </div>
 
-	<!-- Title -->
-	<h1 class="admin-heading">User Management</h1>
-	<p class="admin-subtitle">Manage users, roles and access</p>
+    <h1 class="admin-heading">User Management</h1>
+    <p class="admin-subtitle">Manage users, roles and organizations</p>
 
-	<!-- Success/Error Messages -->
-	@if (TempData["SuccessMessage"] != null)
-	{
-		<div class="alert-success">
-			@TempData["SuccessMessage"]
-		</div>
-	}
-	
-	@if (TempData["ErrorMessage"] != null)
-	{
-		<div class="alert-error">
-			@TempData["ErrorMessage"]
-		</div>
-	}
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-error">
+            @TempData["ErrorMessage"]
+        </div>
+    }
 
-	<!-- Create new user -->
-	<div class="users-header-row">
-		<a asp-action="Create" class="btn-create">Create new user</a>
-	</div>
+    <div class="users-header-row">
+        <a asp-action="ManageOrganizations" class="btn-create-secondary">Manage Organizations</a>
+        <a asp-action="Create" class="btn-create">+ New User</a>
+    </div>
 
-	<!-- Users list -->
-	@if (Model != null && Model.Any())
-	{
-		foreach (var user in Model)
-		{
-			<div class="user-card">
-				<div class="user-main">
-					<div class="user-avatar" aria-hidden="true"></div>
+    @if (Model != null && Model.Any())
+    {
+        foreach (var user in Model)
+        {
+            <div class="user-card">
+                <div class="user-main">
+                    @* aria-hidden="true" skjuler avatar-sirkelen for skjermlesere (Accessibility) *@
+                    <div class="user-avatar" aria-hidden="true"></div>
 
-					<div class="user-text">
-						<strong>@user.Name</strong>
+                    <div class="user-text">
+                        <strong>@user.Name</strong>
 
-						<div class="user-meta">
-							<span>Username: @user.UserName</span>
-							<span>Role: @user.Role</span>
-						</div>
-					</div>
-				</div>
+                        <div class="user-meta">
+                            <span>Username: @user.UserName</span>
+                            <span class="org-badge">@user.OrganizationName</span>
+                            <span>Role: @user.Role</span>
+                        </div>
+                    </div>
+                </div>
 
-				<div class="user-actions">
-					<a asp-action="Edit" asp-route-id="@user.Id" class="btn-edit">Edit</a>
-					
-					<!-- Delete Button with Modal -->
-					<button type="button" onclick="confirmDelete(@user.Id, '@user.UserName')" class="btn-delete">Delete</button>
-				</div>
-			</div>
-		}
-	}
-	else
-	{
-		<p style="color: #555; text-align: center; margin-top: 40px;">No users found.</p>
-	}
+                <div class="user-actions">
+                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn-edit">Edit</a>
+                    
+                    @* Kaller JavaScript-funksjonen for å åpne modalen *@
+                    <button type="button" onclick="confirmDelete(@user.Id, '@user.UserName')" class="btn-delete">Delete</button>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p style="color: #555; text-align: center; margin-top: 40px;">No users found.</p>
+    }
 </div>
 
-<!-- Delete Confirmation Modal -->
+@* DELETE CONFIRMATION MODAL *@
 <div id="deleteModal" class="modal">
-	<div class="modal-content">
-		<h3 style="margin-bottom: 16px;">Confirm Deletion</h3>
-		<p style="margin-bottom: 20px;">Are you sure you want to delete user <strong id="userToDelete"></strong>? This action cannot be undone.</p>
-		<div style="display: flex; gap: 8px; justify-content: flex-end;">
-			<button type="button" onclick="closeModal()" class="btn-cancel">Cancel</button>
-			<form id="deleteForm" method="post" asp-action="Delete">
-				@Html.AntiForgeryToken()
-				<input type="hidden" name="id" id="deleteUserId" />
-				<button type="submit" class="btn-delete">Delete</button>
-			</form>
-		</div>
-	</div>
+    <div class="modal-content">
+        <h3 style="margin-bottom: 16px;">Confirm Deletion</h3>
+        <p style="margin-bottom: 20px;">Are you sure you want to delete user <strong id="userToDelete"></strong>? This action cannot be undone.</p>
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button type="button" onclick="closeModal()" class="btn-cancel">Cancel</button>
+            
+            <form id="deleteForm" method="post" asp-action="Delete">
+                @* Sikkerhet: AntiForgeryToken er kritisk her siden vi poster data *@
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteUserId" />
+                <button type="submit" class="btn-delete">Delete</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
+    // JavaScript Logic for Modal handling
     function confirmDelete(userId, userName) {
         document.getElementById('userToDelete').textContent = userName;
         document.getElementById('deleteUserId').value = userId;
@@ -302,7 +329,7 @@
         document.getElementById('deleteModal').style.display = 'none';
     }
 
-    // Close modal when clicking outside
+    // Close modal when clicking outside of it
     window.onclick = function(event) {
         const modal = document.getElementById('deleteModal');
         if (event.target === modal) {
@@ -310,7 +337,7 @@
         }
     }
 
-    // Auto-close success messages after 5 seconds
+    // Auto-close success messages after 5 seconds for better UX
     document.addEventListener('DOMContentLoaded', function() {
         const successMessage = document.querySelector('.alert-success');
         if (successMessage) {

@@ -2,22 +2,78 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kartverket.Web.Models
 {
+    /// <summary>
+    /// ViewModel for managing users (Create/Edit) in the Admin panel.
+    /// Combines user data with selection of Role and Organization.
+    /// </summary>
     public class UserAdminViewModel
     {
-        public int Id { get; set; }               // used by listing
-        public string Name { get; set; }
-        public string UserName { get; set; }
+        public int Id { get; set; }
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }         // required by Create view
+        [Required(ErrorMessage = "Username is required.")]
+        [Display(Name = "Username")]
+        public string UserName { get; set; } = string.Empty;
 
-        [DataType(DataType.Password)]
-        public string Password { get; set; }      // required by Create view
+        // This might be redundant if UserName is used for display, 
+        // but kept to prevent breaking existing views.
+        [Display(Name = "Name")]
+        public string Name { get; set; } = string.Empty; 
 
-        [Required]
-        public int? RoleId { get; set; }          // required by Create view
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
 
-        public string Role { get; set; }          // used for display in list
+        /// <summary>
+        /// Password is optional when editing (null means "do not change").
+        /// </summary>
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+        [MaxLength(100, ErrorMessage = "Password cannot be longer than 100 characters")]
+        [Display(Name = "Password")]
+        [DataType(DataType.Password)] // Masks input in the browser
+        public string? Password { get; set; }
+
+        // --- Role ---
+
+        [Display(Name = "Role")]
+        [Required(ErrorMessage = "Please select a role.")]
+        public int? RoleId { get; set; }
+        
+        // For display only (not input)
+        public string? Role { get; set; } 
+
+        // --- Organization ---
+        
+        [Display(Name = "Organization")]
+        [Required(ErrorMessage = "Please select an organization.")]
+        public int? OrgId { get; set; }
+        
+        // For display only (not input)
+        public string? OrganizationName { get; set; } 
+    }
+
+    /// <summary>
+    /// ViewModel for creating a new organization.
+    /// </summary>
+    public class CreateOrgViewModel 
+    {
+        [Required(ErrorMessage = "Organization Name is required.")]
+        [Display(Name = "Organization Name")]
+        [StringLength(50, ErrorMessage = "Name cannot exceed 50 characters.")]
+        public string OrgName { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Simple DTO for listing organizations with user statistics.
+    /// </summary>
+    public class OrganizationListViewModel
+    {
+        public int OrgId { get; set; }
+        
+        [Display(Name = "Organization")]
+        public string OrgName { get; set; } = string.Empty;
+
+        [Display(Name = "User Count")]
+        public int UserCount { get; set; }
     }
 }

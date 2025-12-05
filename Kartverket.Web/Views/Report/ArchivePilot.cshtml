@@ -1,21 +1,20 @@
-﻿@model IEnumerable<Kartverket.Web.Models.ArchiveRow>
+@model IEnumerable<Kartverket.Web.Models.ArchiveRow>
 
 @* ---------------------------------------------------------------------------
-    View: Report Archive
-    Role: All (Admin, Registrar, Pilot)
+    View: My Reports (Pilot Archive)
+    Role: Pilot
     Description: 
-        Fullstendig historikk over rapporter.
-        Inneholder søk og sortering på klientsiden (JavaScript).
+        Viser historikk over rapporter innsendt av innlogget pilot.
+        Inneholder søk og sortering på klientsiden.
         
     ARCHITECTURAL NOTE:
-        Search and Sort logic is currently implemented Client-Side for UX responsiveness.
-        For production systems with large datasets (>1000 records), this should be refactored 
-        to Server-Side Pagination and Filtering (using LINQ/EF Core) to reduce bandwidth and memory usage.
+        Client-side filtering is used here for immediate UI responsiveness.
+        For larger datasets, Server-side pagination (Skip/Take) is recommended.
     --------------------------------------------------------------------------- 
 *@
 
 @{
-    ViewData["Title"] = "Report Archive";
+    ViewData["Title"] = "My Reports";
 }
 
 <section class="mx-auto max-w-6xl pt-10 px-4">
@@ -26,16 +25,16 @@
              alt="Kartverket"
              class="h-16 w-auto" />
         <h1 class="text-4xl font-medium text-gray-900">
-            Report Archive
+            My Reports
         </h1>
     </div>
 
     <div class="mb-6 max-w-2xl mx-auto">
-        <label for="searchInput" class="sr-only">Search reports</label>
+        <label for="searchInput" class="sr-only">Search my reports</label>
         <div class="relative">
             <input type="text" 
                    id="searchInput" 
-                   placeholder="Search by Report ID, Title, Pilot, Status, Category..." 
+                   placeholder="Search by Report ID, Title, Status, Category..." 
                    class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-800 focus:border-transparent shadow-sm" />
             
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,7 +49,8 @@
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p class="text-gray-600 text-lg">No reports found in the archive.</p>
+            <p class="text-gray-600 text-lg">No reports found.</p>
+            <p class="text-gray-500 text-sm mt-2">You haven't submitted any obstacle reports yet.</p>
         </div>
     }
     else
@@ -60,10 +60,8 @@
                 <table class="min-w-full table-auto divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            @* Data-attributes used by JS for sorting *@
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="int">Report ID</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="string">Title</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="string">Submitted by</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="string">Status</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="int">Height (ft)</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer" data-sort="date">Date</th>
@@ -84,25 +82,12 @@
                                     <div class="text-sm font-medium text-gray-900">@(report.Title ?? "Untitled")</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                            <span class="text-xs font-medium text-gray-600">
-                                                @* Safe substring: handles null or empty strings *@
-                                                @(!string.IsNullOrEmpty(report.Pilot) ? report.Pilot.Substring(0, 1).ToUpper() : "?")
-                                            </span>
-                                        </div>
-                                        <div class="text-sm text-gray-700">@(report.Pilot ?? "Unknown")</div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
                                     @{
-                                        // Logic for status badges inside View (Presentation Logic)
                                         var statusClass = report.Status switch
                                         {
                                             "Approved" => "bg-green-100 text-green-800",
                                             "Rejected" => "bg-red-100 text-red-800",
                                             "Pending"  => "bg-yellow-100 text-yellow-800",
-                                            "Draft"    => "bg-gray-100 text-gray-600",
                                             _          => "bg-gray-100 text-gray-800"
                                         };
                                     }
@@ -118,10 +103,11 @@
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                    @* Linker tilbake til Pilotens arkiv-visning (som ofte er samme som Details) *@
                                     <a asp-action="Details"
                                        asp-controller="Report"
                                        asp-route-id="@report.ReportId"
-                                       asp-route-returnUrl="@Url.Action("Archive", "Report")"
+                                       asp-route-returnUrl="@Url.Action("ArchivePilot", "Report")"
                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-green-800 text-white text-xs font-medium hover:bg-green-900 transition-colors">
                                         View
                                     </a>
@@ -134,33 +120,32 @@
         </div>
         
         <div id="noResults" class="hidden mt-6 bg-white shadow-md rounded-2xl p-8 border border-gray-200 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p class="text-gray-600">No reports match your search criteria.</p>
         </div>
 
         <div class="mt-6 text-center text-sm text-gray-600">
-            Showing <span class="font-medium text-gray-900">@Model.Count()</span> reports
+            Showing <span class="font-medium text-gray-900">@Model.Count()</span> of your reports
         </div>
     }
 
     <div class="mt-8 text-center mb-6">
-        <a asp-controller="Registrar" asp-action="RegisterMetode"
+        @* Merk: Sender til Home/MainPage. Vurder om denne burde gå til Pilot/MainPage hvis PilotController er hovedkontrolleren. *@
+        <a asp-controller="Home" asp-action="MainPage"
            class="inline-flex items-center px-6 py-3 rounded-xl bg-gray-400 hover:bg-gray-500 text-white font-semibold shadow-md hover:shadow-lg transition-all">
             Back to Home
         </a>
     </div>
-
 </section>
 
 
 @section Scripts {
     <script>
         /**
-         * CLIENT-SIDE SEARCH & SORT
-         * -------------------------
-         * Combines sorting logic (columns) and filtering logic (search bar).
+         * CLIENT-SIDE SORTING & FILTERING
+         * Duplicate logic from Archive.cshtml to ensure consistency across views.
          */
         (function () {
             const container = document.querySelector('.overflow-x-auto');
@@ -174,9 +159,9 @@
             const headerCells = Array.from(thead.rows[0].cells);
             const lastCol = headerCells.length - 1; 
 
-            // --- 1. SETUP SORTING ---
+            // --- SORTING SETUP ---
             headerCells.forEach((th, i) => {
-                if (i === lastCol) return; 
+                if (i === lastCol) return;
                 th.dataset.sortable = 'true';
                 th.style.cursor = 'pointer';
                 if (!th.querySelector('.sort-indicator')) {
@@ -197,15 +182,11 @@
             const normalize = (val) => {
                 if (!val) return { t: 's', v: '' };
 
-                // ISO-like date
-                const dm = val.match(/^\s*(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?\s*$/);
-                if (dm) {
-                    const y = +dm[1], mo = (+dm[2]) - 1, d = +dm[3];
-                    const h = dm[4] ? +dm[4] : 0, mi = dm[5] ? +dm[5] : 0, s = dm[6] ? +dm[6] : 0;
-                    return { t: 'd', v: Date.UTC(y, mo, d, h, mi, s) };
-                }
-                
-                // Numerics
+                // ISO Date
+                const fIso = Date.parse(val);
+                if (!isNaN(fIso)) return { t: 'd', v: fIso };
+
+                // Numeric
                 const numMatch = val.trim().match(/^[-+]?[0-9]*[.,]?[0-9]+(?:[eE][-+]?\d+)?/);
                 if (numMatch) {
                     const n = parseFloat(val.replace(',', '.').replace(/[^\d\.\-eE]/g, ''));
@@ -222,7 +203,7 @@
                         ind.innerText = '↕';
                         ind.classList.remove('text-green-800');
                         ind.classList.add('text-gray-400');
-                    } 
+                    }
                     th.removeAttribute('aria-sort');
                     delete th.dataset.order;
                 });
@@ -235,8 +216,6 @@
                     const current = th.dataset.order === 'asc' ? 'asc' : th.dataset.order === 'desc' ? 'desc' : null;
                     const order = current === 'asc' ? 'desc' : 'asc';
                     
-                    // Filter only visible rows if search is active? 
-                    // Usually we sort ALL rows, then search filter hides them again.
                     const rows = Array.from(tbody.rows);
 
                     rows.sort((A, B) => {
@@ -253,9 +232,7 @@
                             const rank = { 'n': 1, 'd': 1, 's': 2 };
                             return (rank[na.t] - rank[nb.t]) * dir;
                         }
-
-                        const cmp = na.v.localeCompare(nb.v, undefined, { numeric: true });
-                        return cmp * dir;
+                        return na.v.localeCompare(nb.v, undefined, { numeric: true }) * dir;
                     });
 
                     rows.forEach(r => tbody.appendChild(r));
@@ -272,7 +249,7 @@
                 });
             });
 
-            // --- 2. SETUP SEARCH ---
+            // --- SEARCH SETUP ---
             const searchInput = document.getElementById('searchInput');
             const noResultsDiv = document.getElementById('noResults');
             
@@ -283,7 +260,6 @@
                     let visibleCount = 0;
 
                     rows.forEach(row => {
-                        // Concatenate text from all columns except the last one (Action)
                         let rowText = '';
                         for (let i = 0; i < row.cells.length - 1; i++) {
                             rowText += row.cells[i].textContent.toLowerCase() + ' ';

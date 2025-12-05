@@ -65,13 +65,26 @@ The project is organized as follows:
 The project uses the following libraries that you may need to install:
 
 ### NuGet Packages
+Entity Framework & Database:
+- Pomelo.EntityFrameworkCore.MySql  
+- Microsoft.EntityFrameworkCore.Design
+- Microsoft.EntityFrameworkCore.Tools  
+- Microsoft.EntityFrameworkCore.InMemory  
 - Aspire.MySqlConnector
 - Aspire.Pomelo.EntityFrameworkCore.MySql  
-- Pomelo.EntityFrameworkCore.MySql  
-- Microsoft.EntityFrameworkCore.Design  
-- Microsoft.EntityFrameworkCore.Tools  
-- Microsoft.VisualStudio.Azure.Containers.Tools.Targets
+
+Testing & mocking
+- xUnit
 - Moq
+- NSubstitute
+
+Aspire & Observability
+- Aspire.Hosting
+- Aspire.Dashboard.Sdk
+- OpenTelemetry
+
+Visual Studio & Docker-integration
+- Microsoft.VisualStudio.Azure.Containers.Tools.Targets
 
 ### Client-side Libraries
 - Tailwind CSS  

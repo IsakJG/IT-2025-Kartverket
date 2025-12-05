@@ -1,11 +1,12 @@
 ﻿using Kartverket.Web.Controllers;
-            using Microsoft.AspNetCore.Mvc;
-            using Microsoft.Extensions.Configuration;
-            using NSubstitute;
-            using Microsoft.Extensions.Logging;
-            using System.Diagnostics;
-            using Microsoft.AspNetCore.Http;
-            using Kartverket.Web.Models;
+using Kartverket.Web.Data;
+using Kartverket.Web.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using System.Diagnostics;
 
 namespace Kartverket.Web.UnitTests.Controllers
     {
@@ -14,9 +15,12 @@ namespace Kartverket.Web.UnitTests.Controllers
             private HomeController GetController()
             {
                 var logger = Substitute.For<ILogger<HomeController>>();
-                var config = Substitute.For<IConfiguration>();
+                var options = new DbContextOptionsBuilder<KartverketDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDb")
+                .Options;
+                var dbContext = new KartverketDbContext(options);
 
-                var controller = new HomeController(logger, config);
+            var controller = new HomeController(dbContext, logger);
 
                 // Mock HttpContext for Error action
                 controller.ControllerContext = new ControllerContext

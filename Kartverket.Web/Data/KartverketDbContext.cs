@@ -1,190 +1,193 @@
 using Microsoft.EntityFrameworkCore;
-using Kartverket.Web.Models.Entities; // her ligger Report, User, osv.
+using Kartverket.Web.Models.Entities;
 
-namespace Kartverket.Web.Data;
-
-public class KartverketDbContext : DbContext
+namespace Kartverket.Web.Data
 {
-    public KartverketDbContext(DbContextOptions<KartverketDbContext> options)
-        : base(options)
+    /// <summary>
+    /// Databasekontekst for Kartverket-applikasjonen.
+    /// Håndterer konfigurasjon av tabeller, relasjoner og skjemaregler.
+    /// </summary>
+    public class KartverketDbContext : DbContext
     {
-    }
-
-    // Vi starter enkelt: bare Report-tabellen
-    public DbSet<Report> Reports => Set<Report>();
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Role> Roles => Set<Role>();
-    public DbSet<Organization> Organization => Set<Organization>();
-    public DbSet<UserRole> UserRoles => Set<UserRole>();
-    public DbSet<Status> Statuses => Set<Status>();
-    public DbSet<Category> Categories => Set<Category>();
-    public DbSet<Image> Images => Set<Image>();
-    public DbSet<TimestampEntry> Timestamps => Set<TimestampEntry>();
-
-
-    protected override void OnModelCreating(ModelBuilder b)
-    {
-        base.OnModelCreating(b);
-
-        // Organization 
-        b.Entity<Organization>(e =>
+        public KartverketDbContext(DbContextOptions<KartverketDbContext> options)
+            : base(options)
         {
-            e.ToTable("Organization");
-            e.HasKey(o => o.OrgId);
+        }
 
-            e.Property(o => o.OrgName)
-            .HasMaxLength(50)
-            .IsRequired();
+        // DbSets representerer tabellene i databasen
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Organization> Organization { get; set; } // Merk: Burde ideelt sett hete "Organizations" (flertall)
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<Status> Statuses { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<TimestampEntry> Timestamps { get; set; }
 
-            //1-to-many relationship with User 
-            e.HasMany(o => o.Users)
-             .WithOne(u => u.Organization)
-             .HasForeignKey(u => u.OrgId)
-             .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
-        });
-
-        //Role
-        b.Entity<Role>(e =>
+        /// <summary>
+        /// Konfigurerer databasemodellen, primærnøkler, relasjoner og begrensninger (Fluent API).
+        /// </summary>
+        protected override void OnModelCreating(ModelBuilder b)
         {
-            e.ToTable("Role");
-            e.HasKey(r => r.RoleId);
+            base.OnModelCreating(b);
 
-            e.Property(r => r.RoleName)
-            .HasMaxLength(50)
-            .IsRequired();
-        });
+            #region Organization & Users
 
-        // User 
-        b.Entity<User>(e =>
-        {
-            e.ToTable("User");
-            e.HasKey(u => u.UserId);
+            b.Entity<Organization>(e =>
+            {
+                e.ToTable("Organization");
+                e.HasKey(o => o.OrgId);
+                
+                e.Property(o => o.OrgName)
+                    .HasMaxLength(50)
+                    .IsRequired();
 
-            e.Property(u => u.Username)
-            .HasMaxLength(50)
-            .IsRequired();
+                // 1-to-many relationship with User 
+                // Restrict delete: Vi kan ikke slette en organisasjon hvis den har ansatte.
+                e.HasMany(o => o.Users)
+                    .WithOne(u => u.Organization)
+                    .HasForeignKey(u => u.OrgId)
+                    .OnDelete(DeleteBehavior.Restrict); 
+            });
 
-            e.Property(u => u.Email)
-            .HasMaxLength(255)
-            .IsRequired();
+            b.Entity<User>(e =>
+            {
+                e.ToTable("User");
+                e.HasKey(u => u.UserId);
 
-            e.Property(u => u.PasswordHash)
-            .HasMaxLength(255)
-            .IsRequired();
-        });
+                e.Property(u => u.Username).HasMaxLength(50).IsRequired();
+                e.Property(u => u.Email).HasMaxLength(255).IsRequired();
+                e.Property(u => u.PasswordHash).HasMaxLength(255).IsRequired();
+            });
 
-        // UserRole 
-        b.Entity<UserRole>(e =>
-        {
-            e.ToTable("UserRole");
-            //Compisite primary key
-            e.HasKey(ur => new { ur.UserId, ur.RoleId });
+            #endregion
 
-            e.HasOne(ur => ur.User)
-             .WithMany(u => u.UserRoles)
-             .HasForeignKey(ur => ur.UserId)
-             .OnDelete(DeleteBehavior.Cascade);
+            #region Roles & Access Control
 
-            e.HasOne(ur => ur.Role)
-             .WithMany(r => r.UserRoles)
-             .HasForeignKey(ur => ur.RoleId)
-             .OnDelete(DeleteBehavior.Cascade);
+            b.Entity<Role>(e =>
+            {
+                e.ToTable("Role");
+                e.HasKey(r => r.RoleId);
+                e.Property(r => r.RoleName).HasMaxLength(50).IsRequired();
+            });
 
-        });
+            b.Entity<UserRole>(e =>
+            {
+                e.ToTable("UserRole");
+                
+                // Composite Primary Key (Mange-til-mange koblingstabell)
+                e.HasKey(ur => new { ur.UserId, ur.RoleId });
 
-        //status
-        b.Entity<Status>(e =>
-        {
-            e.ToTable("Status");
-            e.HasKey(s => s.StatusId);
+                e.HasOne(ur => ur.User)
+                    .WithMany(u => u.UserRoles)
+                    .HasForeignKey(ur => ur.UserId)
+                    .OnDelete(DeleteBehavior.Cascade); // Sletter vi brukeren, ryker koblingen
 
-            e.Property(s => s.StatusName)
-            .HasMaxLength(50)
-            .IsRequired();
-        });
+                e.HasOne(ur => ur.Role)
+                    .WithMany(r => r.UserRoles)
+                    .HasForeignKey(ur => ur.RoleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-        //category
-        b.Entity<Category>(e =>
-        {
-            e.ToTable("Category");
-            e.HasKey(c => c.CategoryId);
+            #endregion
 
-            e.Property(c => c.CategoryName)
-            .HasMaxLength(50)
-            .IsRequired();
-        });
+            #region Lookups (Status, Category, Image)
 
-        //image
-        b.Entity<Image>(e =>
-        {
-            e.ToTable("Image");
-            e.HasKey(i => i.ImageId);
+            b.Entity<Status>(e =>
+            {
+                e.ToTable("Status");
+                e.HasKey(s => s.StatusId);
+                e.Property(s => s.StatusName).HasMaxLength(50).IsRequired();
+            });
 
-            e.Property(i => i.ImageUrl)
-            .HasMaxLength(255)
-            .IsRequired();
-        });
+            b.Entity<Category>(e =>
+            {
+                e.ToTable("Category");
+                e.HasKey(c => c.CategoryId);
+                e.Property(c => c.CategoryName).HasMaxLength(50).IsRequired();
+            });
 
-        //timestampentry
-        b.Entity<TimestampEntry>(e =>
-        {
-            e.ToTable("TimestampEntry");
-            e.HasKey(t => t.DateId);
+            b.Entity<Image>(e =>
+            {
+                e.ToTable("Image");
+                e.HasKey(i => i.ImageId);
+                e.Property(i => i.ImageUrl).HasMaxLength(255).IsRequired();
+            });
 
-            e.Property(t => t.DateCreated)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            #endregion
 
-            e.Property(t => t.DateOfLastChange)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
-        });
+            #region Timestamp Logic
 
-        // Report
-        b.Entity<Report>(e =>
-        {
-            e.ToTable("Report");
-            e.HasKey(x => x.ReportId);
-            e.Property(r => r.Title)
-             .HasMaxLength(255);
+            b.Entity<TimestampEntry>(e =>
+            {
+                e.ToTable("TimestampEntry");
+                e.HasKey(t => t.DateId);
 
-            e.Property(x => x.StatusId)
-            .HasDefaultValue(1);
+                // SQL Default Values
+                e.Property(t => t.DateCreated)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            e.HasOne(r => r.User)
-             .WithMany(u => u.Reports)
-             .HasForeignKey(r => r.UserId)
-             .OnDelete(DeleteBehavior.SetNull);
+                e.Property(t => t.DateOfLastChange)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
 
-            e.HasOne(r => r.AssignedToUser)
-                .WithMany(u => u.AssignedReports)
-                .HasForeignKey(r => r.AssignedToUserId)
-                .OnDelete(DeleteBehavior.SetNull);
+            #endregion
 
-            e.HasOne(r => r.DecisionByUser)
-                .WithMany(u => u.DecidedReports)
-                .HasForeignKey(r => r.DecisionByUserId)
-                .OnDelete(DeleteBehavior.SetNull);
+            #region Report Configuration
 
-            e.HasOne(r => r.Image)
-            .WithMany(i => i.Reports)
-            .HasForeignKey(r => r.ImageId)
-            .OnDelete(DeleteBehavior.SetNull);
+            b.Entity<Report>(e =>
+            {
+                e.ToTable("Report");
+                e.HasKey(x => x.ReportId);
+                
+                e.Property(r => r.Title)
+                    .HasMaxLength(255);
 
-            e.HasOne(r => r.Status)
-            .WithMany(s => s.Reports)
-            .HasForeignKey(r => r.StatusId)
-            .OnDelete(DeleteBehavior.SetNull);
+                // Default status: 1 (Pending)
+                e.Property(x => x.StatusId)
+                    .HasDefaultValue(1); 
 
-            e.HasOne(r => r.Category)
-            .WithMany(c => c.Reports)
-            .HasForeignKey(r => r.CategoryId)
-            .OnDelete(DeleteBehavior.SetNull);
+                // Konfigurer relasjoner med SetNull 
+                // (Hvis en bruker/status slettes, beholdes rapporten men feltet settes til NULL)
+                
+                e.HasOne(r => r.User)
+                    .WithMany(u => u.Reports)
+                    .HasForeignKey(r => r.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
-            e.HasOne(r => r.TimestampEntry)
-            .WithMany(t => t.Reports)
-            .HasForeignKey(r => r.DateId)
-            .OnDelete(DeleteBehavior.SetNull);
+                e.HasOne(r => r.AssignedToUser)
+                    .WithMany(u => u.AssignedReports)
+                    .HasForeignKey(r => r.AssignedToUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
-        });
+                e.HasOne(r => r.DecisionByUser)
+                    .WithMany(u => u.DecidedReports)
+                    .HasForeignKey(r => r.DecisionByUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
+                e.HasOne(r => r.Image)
+                    .WithMany(i => i.Reports)
+                    .HasForeignKey(r => r.ImageId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                e.HasOne(r => r.Status)
+                    .WithMany(s => s.Reports)
+                    .HasForeignKey(r => r.StatusId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                e.HasOne(r => r.Category)
+                    .WithMany(c => c.Reports)
+                    .HasForeignKey(r => r.CategoryId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                e.HasOne(r => r.TimestampEntry)
+                    .WithMany(t => t.Reports)
+                    .HasForeignKey(r => r.DateId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            #endregion
+        }
     }
 }
